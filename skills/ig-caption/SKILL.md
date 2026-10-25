@@ -10,6 +10,8 @@ description: >-
 
 # ig-caption
 
+For Turkish-language requests, read [SKILL.tr.md](SKILL.tr.md). The translation documents the existing English-first tool limitations; it does not change the scripts.
+
 One tool lives in this folder and it runs:
 
 ```bash

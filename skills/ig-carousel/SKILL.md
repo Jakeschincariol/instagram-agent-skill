@@ -9,6 +9,8 @@ description: >-
 
 # ig-carousel
 
+For Turkish-language requests, read [SKILL.tr.md](SKILL.tr.md). The translation documents the existing English-first tool limitations; it does not change the scripts.
+
 Carousels are the highest-dwell format on the grid, because a swipe is an
 interaction and a scroll is not. They also get a second chance: Instagram can
 show a carousel again starting from a later slide to someone who did not engage

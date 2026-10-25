@@ -10,6 +10,8 @@ description: >-
 
 # ig-profile
 
+For Turkish-language requests, read [SKILL.tr.md](SKILL.tr.md). The translation documents the existing English-first tool limitations; it does not change the scripts.
+
 Almost everybody optimises the wrong thing here. The profile is not a
 storefront people browse. It is a **decision screen**, arrived at from one
 reel, and it gets about three seconds to answer one question: is there more of

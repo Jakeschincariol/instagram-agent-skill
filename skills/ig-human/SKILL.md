@@ -11,6 +11,8 @@ description: >-
 
 # ig-human
 
+For Turkish-language requests, read [SKILL.tr.md](SKILL.tr.md). The translation documents the existing English-first tool limitations; it does not change the scripts.
+
 Two tools live in this folder and they both actually run. Use them. Do not
 eyeball this.
 

@@ -10,6 +10,8 @@ description: >-
 
 # ig-repurpose
 
+For Turkish-language requests, read [SKILL.tr.md](SKILL.tr.md). The translation documents the existing English-first tool limitations; it does not change the scripts.
+
 One good long asset contains four to six posts. Most people extract one and
 throw the rest away.
 

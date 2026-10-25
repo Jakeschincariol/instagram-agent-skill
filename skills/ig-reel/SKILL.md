@@ -11,6 +11,8 @@ description: >-
 
 # ig-reel
 
+For Turkish-language requests, read [SKILL.tr.md](SKILL.tr.md). The translation documents the existing English-first tool limitations; it does not change the scripts.
+
 Turns one raw idea into a Reel that somebody finishes.
 
 Two tools live in this folder and they both actually run. Use them. Do not

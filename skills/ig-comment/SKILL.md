@@ -9,6 +9,8 @@ description: >-
 
 # ig-comment
 
+For Turkish-language requests, read [SKILL.tr.md](SKILL.tr.md). The translation documents the existing English-first tool limitations; it does not change the scripts.
+
 Commenting is the highest-leverage twenty minutes on Instagram and the easiest
 to do badly. A comment near the top of a reel with 40,000 views is seen by more
 people than most accounts' own posts, and it is the one place where a stranger

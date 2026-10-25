@@ -10,6 +10,8 @@ description: >-
 
 # ig-dm
 
+For Turkish-language requests, read [SKILL.tr.md](SKILL.tr.md). The translation documents the existing English-first tool limitations; it does not change the scripts.
+
 Instagram DMs are the only place on the platform where money actually changes
 hands, and they are also where most accounts burn the goodwill their content
 earned. The difference is entirely about who moved first.

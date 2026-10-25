@@ -10,6 +10,8 @@ description: >-
 
 # ig-story
 
+For Turkish-language requests, read [SKILL.tr.md](SKILL.tr.md). The translation documents the existing English-first tool limitations; it does not change the scripts.
+
 Stories are not a smaller feed. The feed is how strangers find you. Stories are
 how the people who already follow you decide whether you are a person worth
 buying from, and they are the only surface on Instagram where a tap turns into

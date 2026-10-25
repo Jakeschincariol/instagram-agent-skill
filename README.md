@@ -1,5 +1,7 @@
 # The Instagram agent skill
 
+[English](README.md) · [Türkçe](README.tr.md)
+
 Thirteen Claude skills that run an Instagram account. Free, MIT, no signup, no
 API key, nothing to connect.
 

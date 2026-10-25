@@ -9,6 +9,8 @@ description: >-
 
 # ig-plan
 
+For Turkish-language requests, read [SKILL.tr.md](SKILL.tr.md). The translation documents the existing English-first tool limitations; it does not change the scripts.
+
 The control room. Everything else in this pack executes; this decides what gets
 executed. Run it once a week, on the same day.
 

@@ -12,6 +12,8 @@ description: >-
 
 # ig-viral
 
+For Turkish-language requests, read [SKILL.tr.md](SKILL.tr.md). The translation documents the existing English-first tool limitations; it does not change the scripts.
+
 The research skill. Everything else in this pack writes; this one goes and
 looks. Run it monthly, not daily. Formulas last a season.
 
