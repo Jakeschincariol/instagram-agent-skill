@@ -163,7 +163,10 @@ python3 detect.py before.txt after.txt       # prove the delta
 - **Invisible characters.** Zero-width spaces and joiners, word joiners, soft
   hyphens, byte-order marks, Unicode tag characters, invisible separators,
   non-breaking and narrow spaces. Your keyboard does not make these. They
-  survive copy-paste and they are invisible in every editor you own.
+  survive copy-paste and they are invisible in every editor you own. The ones
+  your text needs stay: emoji sequences like 👨‍👩‍👧 and 🏳️‍🌈, subdivision flags,
+  and the joiners and direction marks Persian, Arabic and Indic scripts spell
+  with.
 - **Typography.** Em dash to comma, en dash to hyphen, curly quotes to
   straight, ellipsis to three dots, and the orphaned punctuation that leaves.
 - **The lexicon.** 154 stock words and phrases with plain-English replacements.

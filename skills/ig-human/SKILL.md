@@ -45,6 +45,13 @@ copy-paste, they are invisible in every editor, and they are the most
 mechanical thing in generated text. `humanize.py` deletes every one, including
 any remaining Unicode format character it does not have a name for.
 
+It leaves the ones real text depends on: the joiner inside an emoji sequence
+(family, rainbow flag, a profession with a skin tone), the tags of the England,
+Scotland and Wales flags, the zero-width joiner and non-joiner between letters
+of Persian, Arabic and Indic words, and direction marks in right-to-left text.
+Stripping those does not remove a tell, it breaks the emoji or misspells the
+word.
+
 **2. Typography.** Em dash to comma, en dash to hyphen, curly quotes to
 straight, ellipsis to three dots, bullet character to hyphen. The em dash pass
 is the one that matters: it collapses the dash to a comma and then cleans up

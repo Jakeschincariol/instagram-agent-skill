@@ -32,6 +32,13 @@ import unicodedata
 HERE = os.path.dirname(os.path.abspath(__file__))
 LEX = os.path.join(HERE, "slop.json")
 
+try:                                              # same exceptions as the cleaner
+    sys.path.insert(0, HERE)
+    from humanize import legit_format_positions   # noqa: E402
+except Exception:                                 # detect.py copied on its own
+    def legit_format_positions(text):
+        return set()
+
 SENT_RE = re.compile(r"[^.!?\n]+[.!?]*")
 WORD_RE = re.compile(r"[A-Za-z']+")
 CONTRACTIONS = re.compile(r"\b\w+'(?:s|t|re|ve|ll|d|m)\b", re.IGNORECASE)
@@ -105,7 +112,8 @@ def check_slop(text, lex):
 
 def check_fingerprint(text):
     """Characters a phone keyboard does not produce."""
-    invisible = sum(1 for c in text if unicodedata.category(c) == "Cf")
+    keep = legit_format_positions(text)
+    invisible = sum(1 for i, c in enumerate(text) if unicodedata.category(c) == "Cf" and i not in keep)
     em = text.count("—")
     curly = sum(text.count(c) for c in "‘’“”")
     ellip = text.count("…")

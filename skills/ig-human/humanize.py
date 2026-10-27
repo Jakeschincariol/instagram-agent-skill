@@ -53,6 +53,48 @@ def _cp(spec):
     return int(spec[2:], 16)
 
 
+# Joiners and marks that real text depends on. Stripping these does not remove a
+# machine tell, it breaks the text: an emoji ZWJ sequence falls apart into
+# separate emoji, a subdivision flag loses its region, and Persian, Arabic and
+# Indic words lose the joins their spelling needs.
+ZWNJ, ZWJ, VS16 = "\u200c", "\u200d", "\ufe0f"
+BLACK_FLAG, TAG_END = "\U0001f3f4", "\U000e007f"
+DIRECTION_MARKS = "\u200e\u200f\u061c"
+RTL_RE = re.compile("[\u0590-\u08ff\ufb1d-\ufdff\ufe70-\ufeff]")
+
+
+def _is_emoji(c):
+    return unicodedata.category(c) in ("So", "Sk") or c == VS16
+
+
+def _joins_letters(c):
+    """A letter or mark outside Latin, i.e. a script that uses ZWJ/ZWNJ inside words."""
+    return unicodedata.category(c)[0] in "LM" and ord(c) > 0x2FF
+
+
+def legit_format_positions(text):
+    """Indexes of invisible characters that are doing real work and must stay."""
+    keep = set()
+    rtl = bool(RTL_RE.search(text))
+    for i, c in enumerate(text):
+        prev = text[i - 1] if i else ""
+        nxt = text[i + 1] if i + 1 < len(text) else ""
+        if c in (ZWJ, ZWNJ) and prev and nxt:
+            if _joins_letters(prev) and _joins_letters(nxt):
+                keep.add(i)              # Persian nim-fasele, Hindi conjuncts
+            elif c == ZWJ and _is_emoji(prev) and _is_emoji(nxt):
+                keep.add(i)              # family, rainbow flag, profession emoji
+        elif c in DIRECTION_MARKS and rtl:
+            keep.add(i)                  # direction marks in Arabic-script or Hebrew text
+        elif c == BLACK_FLAG:
+            j = i + 1                    # England, Scotland, Wales: flag + tags + cancel tag
+            while j < len(text) and 0xE0020 <= ord(text[j]) <= 0xE007E:
+                j += 1
+            if j > i + 1 and j < len(text) and text[j] == TAG_END:
+                keep.update(range(i + 1, j + 1))
+    return keep
+
+
 def protect_urls(text):
     """Swap URLs for placeholders so no pass rewrites inside a link."""
     found = []
@@ -72,25 +114,33 @@ def restore_urls(text, found):
 
 def pass_invisible(text, lex):
     """Delete or space-normalise invisible characters. Returns (text, hits)."""
-    hits = []
+    keep = legit_format_positions(text)
+    rules = []
     for entry in lex["invisible"]:
         cp = _cp(entry["cp"])
-        if isinstance(cp, tuple):
-            pattern = "[" + re.escape(chr(cp[0])) + "-" + re.escape(chr(cp[1])) + "]"
+        rules.append((cp if isinstance(cp, tuple) else (cp, cp), entry))
+    counts = [0] * len(rules)
+    stray = 0
+    out = []
+    for i, c in enumerate(text):
+        if i in keep:
+            out.append(c)
+            continue
+        n = ord(c)
+        hit = next((k for k, ((lo, hi), _) in enumerate(rules) if lo <= n <= hi), None)
+        if hit is not None:
+            counts[hit] += 1
+            if rules[hit][1]["action"] != "delete":
+                out.append(" ")
+        elif unicodedata.category(c) == "Cf":
+            stray += 1                   # any remaining Cf (format) character is invisible by definition
         else:
-            pattern = re.escape(chr(cp))
-        n = len(re.findall(pattern, text))
-        if n:
-            hits.append({"name": entry["cp"] + " " + entry["name"], "count": n,
-                         "action": entry["action"]})
-            text = re.sub(pattern, "" if entry["action"] == "delete" else " ", text)
-    # Any remaining Cf (format) character is invisible by definition.
-    stray = [c for c in text if unicodedata.category(c) == "Cf"]
+            out.append(c)
+    hits = [{"name": entry["cp"] + " " + entry["name"], "count": counts[k], "action": entry["action"]}
+            for k, (_, entry) in enumerate(rules) if counts[k]]
     if stray:
-        hits.append({"name": "other invisible format chars", "count": len(stray),
-                     "action": "delete"})
-        text = "".join(c for c in text if unicodedata.category(c) != "Cf")
-    return text, hits
+        hits.append({"name": "other invisible format chars", "count": stray, "action": "delete"})
+    return "".join(out), hits
 
 
 def pass_typographic(text, lex):
