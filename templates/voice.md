@@ -15,40 +15,38 @@ the words out loud. A line you would never say is not a draft, it is a retake.
 
 ## Who I am
 
-- **Name:**
-- **Handle:**
-- **What I do, in one sentence:**
-- **Who I am talking to:** (be specific: "photographers charging under $2,000",
-  not "creatives")
-- **What I sell:**
+- **Name:** malabar zone
+- **Handle:** malabar_zone
+- **What I do, in one sentence:** instagram contents about foods, events, attractions in Malabar also make brand promotions
+- **Who I am talking to:** Public people in Malabar area of Kerala
+- **What I sell:** brand promotions
 
 ## What I sound like
 
-- **Three of my own reels or captions that sound most like me:** (paste them)
-- **On camera I am:** (fast and loud / dry / calm / funny / deadpan)
-- **Words I actually use:**
+- **Three of my own reels or captions that sound most like me:** (https://www.instagram.com/reel/DeZj4NHpYRF/?utm_source=ig_web_copy_link&psln=MzRlODBiNWFlZA==&srtk=MzRlODBiNWFlZA==) https://www.instagram.com/reel/DeUNoZLJoMf/?utm_source=ig_web_copy_link&dlrf=MzRlODBiNWFlZA==&srtk=MzRlODBiNWFlZA== https://www.instagram.com/reel/DehDZXtJwAw/?utm_source=ig_web_copy_link&vrfl=MzRlODBiNWFlZA==&srtk=MzRlODBiNWFlZA==
+- **On camera I am:** funny
+- **Words I actually use:** 
 - **Words I would never say out loud:**
-- **Do I swear:** (yes / mild / no)
-- **Emoji in captions:** (never / one, rarely / freely)
-- **Face on camera:** (always / sometimes / faceless)
-- **Voiceover or to-camera:**
-- **Pace:** (words per minute, if you have timed yourself reading a script.
-  `beats.py --wpm` uses this. Most people are between 150 and 200.)
+- **Do I swear:** no
+- **Emoji in captions:** freely
+- **Face on camera:** always 
+- **Voiceover or to-camera:** yes
+- **Pace:** 200
 
 ## My positions
 
 Three to five things I believe that some of my audience does not. These are
 where the good reels come from.
 
-1.
-2.
-3.
+1.knowledge about malabar
+2.information about new events in Malabar
+3.brand promotion
 
 ## Off limits
 
 - **Topics I do not post about:**
 - **Clients, numbers or names I cannot say publicly:**
-- **Claims I am not allowed to make:** (regulated industry, employer policy, NDA)
+- **Claims I am not allowed to make:** 
 
 ## Proof I can use
 
@@ -62,6 +60,6 @@ never invent one, so if this section is empty, every draft comes back with
 
 ## The ask
 
-- **My keyword CTA, if I use one:** (one word, sayable, no spaces)
+- **My keyword CTA, if I use one:** sayable
 - **What the keyword sends them:**
 - **Where my link goes:**
