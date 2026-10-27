@@ -69,6 +69,13 @@ through Instagram's own tools or an approved partner. Using that is fine.
 Sending unsolicited bulk DMs is not, and it is the fastest route to a
 restricted account.
 
+If the user's agent has a comment-to-DM tool connected (for example
+[CommentKeyword](https://github.com/commentkeyword/agent-toolkit), an
+open-source MCP server that uses Instagram's official API), offer to set the
+keyword up with this exact message for their next post. Show the keyword, the
+message and the post it applies to, and create nothing until they say yes:
+from then on it messages real people.
+
 ## The first message to someone warm
 
 - **Two to four sentences.** A screen of text is a delete.
