@@ -172,7 +172,7 @@ def check_frontload(text):
     penalty = 0
     hit_opener = None
     for weak in WEAK_OPENERS:
-        if opener.startswith(weak) or low[0] == weak:
+        if low[0] == weak or (" " in weak and opener.startswith(weak)):
             penalty, hit_opener = 30, weak
             break
     payload = None
