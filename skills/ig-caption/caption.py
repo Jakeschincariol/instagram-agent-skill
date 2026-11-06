@@ -105,7 +105,11 @@ MENTION_RE = re.compile(r"(?:^|\s)(@[A-Za-z0-9_.]+)")
 LINK_RE = re.compile(r"https?://\S+|\bwww\.\S+|\b[a-z0-9-]+\.(?:com|co|io|net|org|ai|app)/\S*",
                      re.IGNORECASE)
 EMOJI_RE = re.compile(r"[\U0001F300-\U0001FAFF☀-➿←-⇿️]")
-CONCRETE_RE = re.compile(r"\$\s?\d|\b\d[\d,.]*\b|(?<!^)\b[A-Z][a-z]{2,}\b", re.MULTILINE)
+CONCRETE_RE = re.compile(
+    r"\$\s?\d|\b\d[\d,.]*\b"
+    r"|(?<!^)\b[A-ZÁÉÍÓÚÑ][a-záéíóúñü]{2,}\b"
+    r"|(?i:\b(?:dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|quince|veinte|treinta|cuarenta|cincuenta|cien|mil|millón|millones|pesos|kilos?)\b)",
+    re.MULTILINE)
 
 ASKS = [
     (re.compile(r"(?i)\bcomment (?:the word |\")?[A-Z0-9]{2,}\b"), "comment a keyword"),
@@ -116,6 +120,20 @@ ASKS = [
     (re.compile(r"(?i)\blink in (?:my )?bio\b"), "link in bio"),
     (re.compile(r"(?i)\b(?:swipe|tap) (?:through|left|right|for|to)\b"), "swipe or tap"),
     (re.compile(r"(?i)\btell me\b|\bwhat would you\b|\bwhich one\b"), "answer a question"),
+    # Rioplatense Spanish. Without these the linter sees no CTA at all in a
+    # Spanish caption and warns "no call to action" on every one that has one.
+    (re.compile(r"(?i)\b(?:comentá|comenta|escribí|poné)\s+[A-Z0-9ÁÉÍÓÚÑ]{2,}\b"),
+     "comentar una palabra clave"),
+    (re.compile(r"(?i)\b(?:contanos|contame|decinos|decime|contános)\b"
+                r"|\ben los comentarios\b|\bacá abajo\b"), "responder una pregunta"),
+    (re.compile(r"(?i)\b(?:escribinos|escribime|mandanos|mandame|consultanos)\b"
+                r"|\bpor (?:el )?privado\b|\bal privado\b|\bpor mensaje privado\b"),
+     "escribir por privado"),
+    (re.compile(r"(?i)\bguard[áa](?:lo|la)?\b"), "guardar el posteo"),
+    (re.compile(r"(?i)\bcompart[í i](?:lo|la)?\b|\bmand[áa]selo\b"), "compartir"),
+    (re.compile(r"(?i)\b(?:seguinos|seguime|seguí nos)\b"), "seguir la cuenta"),
+    (re.compile(r"(?i)\blink en (?:la )?bio\b|\benlace en (?:la )?bio\b"), "link en la bio"),
+    (re.compile(r"(?i)\b(?:pasá|pasate|acercate|vení)\s+(?:por|a)\b"), "pasar por el local"),
 ]
 
 FILLER_TAGS = {"#viral", "#fyp", "#explore", "#explorepage", "#foryou", "#foryoupage",

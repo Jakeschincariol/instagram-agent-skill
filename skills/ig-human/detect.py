@@ -59,9 +59,64 @@ SENT_RE = re.compile(r"[^.!?\u0964\u0965\u06d4\u061f\n]+[.!?\u0964\u0965\u06d4\u
 # Letters in any script, with their combining marks, and the apostrophe.
 WORD_RE = re.compile(r"(?:[^\W\d_]|['" + MARKS + r"])+")
 CONTRACTIONS = re.compile(r"\b\w+'(?:s|t|re|ve|ll|d|m)\b", re.IGNORECASE)
-PRONOUNS = re.compile(r"\b(i|me|my|mine|we|us|our|you|your)\b", re.IGNORECASE)
+PRONOUNS = re.compile(
+    r"\b(i|me|my|mine|we|us|our|you|your"
+    r"|yo|m[í i]|mis|mío|mía|nosotros|nuestro|nuestra|nuestros|nuestras"
+    r"|vos|te|ti|tu|tus|tuyo|tuya|usted|ustedes|les|nos)\b", re.IGNORECASE)
 NUMBERS = re.compile(r"\b\d[\d,.]*%?\b|\$\d")
-PROPER = re.compile(r"(?<![.!?]\s)(?<!^)\b[A-Z][a-z]{2,}\b", re.MULTILINE)
+PROPER = re.compile(r"(?<![.!?]\s)(?<!^)\b[A-ZÁÉÍÓÚÑ][a-záéíóúñü]{2,}\b", re.MULTILINE)
+
+
+def clamp(n):
+    return max(0.0, min(100.0, n))
+
+
+# ---------------------------------------------------------------------------
+# Rioplatense Spanish.
+#
+# The word lists were not the whole problem. check_voice puts 35% of its weight
+# on contraction density ("don't", "I'm"), and Spanish has no apostrophe
+# contractions at all, so every Spanish text scored zero on that third no matter
+# how it was written. What follows replaces that measure, for Spanish only, with
+# the real local equivalent of spoken register: voseo, filler words and
+# diminutives.
+# ---------------------------------------------------------------------------
+
+ES_HINT = re.compile(
+    r"[ñÑ¿¡]|\b(?:de|que|el|la|los|las|un|una|por|para|con|en|es|se|"
+    r"y|no|más|pero|como|su|sus)\b", re.IGNORECASE)
+
+# Voseo verb forms and filler words: what stands in for the contraction here.
+ES_SPOKEN = re.compile(
+    r"\b(?:tenés|querés|podés|sabés|hacés|decís|venís|sos|andás|tené|mirá|"
+    r"escuchá|fijate|acordate|dale|che|posta|obvio|tipo|igual|ojo|pará|bueno|"
+    r"nada|o sea|viste|re|súper|un toque|al toque|de una|ni ahí|capaz)\b",
+    re.IGNORECASE)
+
+# Diminutives: a strong marker of informal register in this dialect.
+ES_DIM = re.compile(r"\b\w{3,}(?:ito|ita|itos|itas)\b", re.IGNORECASE)
+ES_DIM_FALSE = {
+    "favorito", "favorita", "favoritos", "favoritas", "éxito", "exito",
+    "infinito", "infinita", "delito", "circuito", "gratuito", "gratuita",
+    "requisito", "depósito", "deposito", "propósito", "proposito",
+    "apetito", "bonito", "bonita", "distrito", "mérito", "merito",
+    "granito", "transito", "tránsito", "maldito", "escrito", "margarita",
+}
+
+
+def is_spanish(text):
+    """Cheap and good enough: the text carries enye/accents or Spanish stopwords."""
+    hits = len(ES_HINT.findall(text))
+    w = max(1, len(WORD_RE.findall(text)))
+    return hits * 100 / w > 12
+
+
+def es_spoken_density(text, per100):
+    """What contractions measure in English: how much this sounds spoken."""
+    n = len(ES_SPOKEN.findall(text))
+    n += len([d for d in ES_DIM.findall(text)
+              if d.lower() not in ES_DIM_FALSE])
+    return n * per100
 
 
 def clamp(n):
@@ -181,7 +236,12 @@ def check_voice(text, lex):
     if non_latin(text):
         return NA, "n/a: contractions and pronouns are only read in English"
     per100 = 100 / len(w)
-    contractions = len(CONTRACTIONS.findall(text)) * per100
+    if is_spanish(text):
+        contractions = es_spoken_density(text, per100)
+        spoken_label = "spoken-register markers"
+    else:
+        contractions = len(CONTRACTIONS.findall(text)) * per100
+        spoken_label = "contractions"
     person = len(PRONOUNS.findall(text)) * per100
     tells = 0
     names = []
@@ -201,7 +261,7 @@ def check_voice(text, lex):
     if uniform:
         score -= 12
         names.append("uniform-bullets")
-    detail = (f"{contractions:.1f} contractions, {person:.1f} personal pronouns "
+    detail = (f"{contractions:.1f} {spoken_label}, {person:.1f} personal pronouns "
               f"per 100 words, {tells} structural tell(s)")
     if names:
         detail += " [" + ", ".join(names[:4]) + "]"

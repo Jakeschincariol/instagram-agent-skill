@@ -22,6 +22,11 @@ python3 hookscore.py --hook "one line"      # score a single one
 python3 beats.py script.txt --target 30     # timed beat sheet before you shoot
 ```
 
+Both tools are bilingual. They score English and Rioplatense Spanish - voseo,
+numbers said in Spanish, local filler openers and local dealbreakers. If the
+user writes in Spanish, do not translate the hook to score it. Pass it through
+as it was said, because the score is about the line they will say out loud.
+
 ## Before you write
 
 1. Read `~/.claude/instagram/voice.md` if it exists. That is the user's voice

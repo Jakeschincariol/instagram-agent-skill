@@ -68,7 +68,7 @@ NUMBER_RE = re.compile(
     r"(?:%|k\b|x\b|hrs?\b|hours?\b|mins?\b|minutes?\b"  # without a unit
     r"|days?\b|weeks?\b|months?\b|years?\b)?",
     re.IGNORECASE)
-PROPER_RE = re.compile(r"(?<!^)\b[A-Z][a-z]{2,}\b")
+PROPER_RE = re.compile(r"(?<!^)\b[A-ZÁÉÍÓÚÑ][a-záéíóúñü]{2,}\b")
 HASHTAG_RE = re.compile(r"(?:^|\s)#\w+")
 EMOJI_RE = re.compile(r"[\U0001F300-\U0001FAFF☀-➿]")
 
@@ -132,6 +132,100 @@ DEALBREAKERS = [
     (EMOJI_RE,
      "Emoji in the hook. On-screen text at hook size has room for words or for an emoji, not both."),
 ]
+
+
+# Rioplatense Spanish.
+#
+# The five checks above were written against English word lists, so a hook
+# written in Spanish scored WEAK however good it was: "cinco veces" was not a
+# number and "pará" was not tension. These sets extend the English ones rather
+# than replacing them, so both languages score and neither regresses.
+#
+# Voseo throughout, because that is how the hook gets said out loud here.
+# Accents are kept meaningful: "pará" (stop) is tension, "para" (for) is a
+# preposition, and collapsing the two would put a tension marker in every line.
+# ---------------------------------------------------------------------------
+
+SPOKEN_NUMBERS_ES = {
+    "cero", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho",
+    "nueve", "diez", "once", "doce", "quince", "veinte", "treinta",
+    "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa",
+    "cien", "ciento", "mil", "millón", "millon", "millones", "docena",
+    "decena", "media", "mitad", "doble", "triple",
+}
+
+MONEY_WORDS_ES = {
+    "pesos", "peso", "dólares", "dolares", "dólar", "dolar", "mangos",
+    "guita", "luca", "lucas", "palo", "palos", "centavos", "plata",
+    "porciento", "ganancia", "facturación", "sueldo", "alquiler",
+    "descuento", "precio", "presupuesto",
+}
+
+STAKES_ES = {
+    # frenar, negar
+    "pará", "pare", "frena", "frená", "nunca", "jamás", "jamas", "nadie",
+    "ninguno", "ninguna", "ni", "tampoco", "sin", "nada",
+    # error y pérdida
+    "mal", "error", "errores", "equivocado", "equivocada", "equivocas",
+    "perdí", "perder", "perdiendo", "perdés", "perdiste", "pérdida",
+    "cuesta", "costó", "costo", "roto", "rota", "arruina", "arruinás",
+    "arruinar", "fracasó", "fracaso", "falla", "fallé", "daña", "dañar",
+    "lastima", "enferma", "tóxico", "toxico", "venenoso",
+    # plata y trueque
+    "gratis", "pagué", "pagar", "pagás", "cobré", "ahorré", "ahorrás",
+    "ahorrar", "regalado", "carito", "caro", "barato",
+    # revelación
+    "verdad", "mito", "mentira", "mentí", "mienten", "secreto", "escondido",
+    "oculto", "prohibido", "ilegal", "estafa", "trampa",
+    # juicio
+    "peor", "odio", "odiás", "desperdicio", "desperdiciás",
+    # giro
+    "antes", "hasta", "salvo", "pero", "excepto", "igual", "encima",
+    "realmente", "todavía", "todavia", "ya", "recién", "recien",
+    "problema", "riesgo", "peligro", "cuidado", "ojo", "advertencia",
+    "arrepentí", "deberías", "deberia", "debería", "contra", "versus",
+    "dejá", "dejar", "borrá", "borrar", "cortá", "primero",
+}
+
+WEAK_OPENERS_ES = [
+    "bueno", "ok", "okey", "oka", "hola", "holis", "buenas", "che",
+    "chicos", "chicas", "gente", "amigos", "bienvenidos", "bienvenidas",
+    "hoy", "básicamente", "basicamente", "sinceramente", "la verdad",
+    "mirá que", "escuchen", "escuchá que", "o sea", "digamos", "nada",
+    "quería", "quiero", "les quiero", "les voy", "te voy", "uno de",
+    "una de", "en este", "en el", "esto es", "acá les", "acá te",
+    "esta es", "este es", "resulta que", "les cuento", "te cuento",
+]
+
+IMPERATIVES_ES = {
+    "pará", "mirá", "mira", "escuchá", "probá", "guardá", "usá",
+    "hacé", "armá", "escribí", "mandá", "llevá", "empezá", "dejá",
+    "fijate", "acordate", "anotá", "copiá", "robá", "borrá", "comprá",
+    "vení", "dale", "pedí", "elegí", "leé", "contá", "sumá", "revisá",
+    "ojo", "nunca", "siempre", "no", "andá", "sacá", "poné", "tené",
+}
+
+SPOKEN_NUMBERS |= SPOKEN_NUMBERS_ES
+MONEY_WORDS |= MONEY_WORDS_ES
+STAKES |= STAKES_ES
+IMPERATIVES |= IMPERATIVES_ES
+WEAK_OPENERS = WEAK_OPENERS + WEAK_OPENERS_ES
+
+DEALBREAKERS += [
+    (re.compile(r"(?i)^\s*[¿¡]?\s*(?:no pares de scrollear|pará de scrollear"
+                r"|no sigas scrolleando|freu?ná el scroll)"),
+     "Abre pidiendo atención. Si la tuvieras no haría falta pedirla."),
+    (re.compile(r"(?i)\b(?:en este (?:video|reel)|en el video de hoy"
+                r"|te voy a (?:mostrar|contar|enseñar)"
+                r"|les voy a (?:mostrar|contar|enseñar)"
+                r"|hoy les traigo|hoy te traigo)\b"),
+     "Preámbulo de video. Borralo y abrí directo en lo que promete."),
+    (re.compile(r"(?i)^\s*[¿¡]?\s*(?:hola|holis|buenas|qué onda|que onda|che\b"
+                r"|bienvenid[oa]s)"),
+     "Saludo. Nadie entra al feed para que lo saluden."),
+]
+
+
 
 
 def clamp(n):
@@ -259,9 +353,18 @@ def check_address(text):
         return NA, "n/a: pronouns are only read in English"
     if re.search(r"\b(you|your|you're|youre|yourself)\b", low):
         return 100.0, "speaks to the viewer"
+    # Spanish second person, including the voseo verb forms that carry it
+    # without a pronoun in front. Without this every Spanish hook fell through
+    # to third person and lost the check outright, whoever it was aimed at.
+    if re.search(r"\b(vos|tu|tus|tuyo|tuya|te|ti|usted|ustedes"
+                 r"|ten\u00e9s|quer\u00e9s|pod\u00e9s|sab\u00e9s|hac\u00e9s|sos|viste|dec\u00eds"
+                 r"|compr\u00e1s|pag\u00e1s|perd\u00e9s)\b", low):
+        return 100.0, "speaks to the viewer"
     if w and w[0] in IMPERATIVES:
         return 90.0, f"imperative opener (\"{w[0]}\")"
     if re.search(r"\b(i|my|me|we|our)\b", low):
+        return 70.0, "first person, no viewer named"
+    if re.search(r"\b(yo|mi|mis|me|nosotros|nuestro|nuestra)\b", low):
         return 70.0, "first person, no viewer named"
     return 35.0, "third person, nobody in the room"
 

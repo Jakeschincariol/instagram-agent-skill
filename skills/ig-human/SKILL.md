@@ -27,6 +27,14 @@ vocabulary that only shows up in captions and voiceovers. It is meant to be
 edited. If the user has a word they always use that the lexicon strips, take it
 out of the file.
 
+The lexicon covers English and Rioplatense Spanish. On Spanish text the panel
+measures spoken register through voseo, filler words and diminutives, because
+Spanish has no apostrophe contractions for the English check to count.
+
+Affectionate words a person really uses for their own animals or their own
+trade are voice, not slop. Do not add them to the lexicon: a humanizer that
+flags the author's own writing is worse than no humanizer.
+
 ## Why this matters more on Instagram than it looks
 
 Captions are short and scripts get said out loud. A written-sounding line in a

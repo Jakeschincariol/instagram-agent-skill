@@ -21,6 +21,10 @@ One tool lives in this folder and it runs:
 python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
 ```
 
+The `swipe.py` classifier reads English and Rioplatense Spanish: all 26
+`match` patterns in hooks.json carry both variants. Do not translate a hook
+to classify it, pass it through as it was said.
+
 ## The one idea that makes this worth doing
 
 **Raw views are not evidence.** An account with two million followers doing
