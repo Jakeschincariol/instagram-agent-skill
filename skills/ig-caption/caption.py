@@ -123,17 +123,17 @@ ASKS = [
     # Rioplatense Spanish. Without these the linter sees no CTA at all in a
     # Spanish caption and warns "no call to action" on every one that has one.
     (re.compile(r"(?i)\b(?:comentá|comenta|escribí|poné)\s+[A-Z0-9ÁÉÍÓÚÑ]{2,}\b"),
-     "comentar una palabra clave"),
+     "comment a keyword"),
     (re.compile(r"(?i)\b(?:contanos|contame|decinos|decime|contános)\b"
-                r"|\ben los comentarios\b|\bacá abajo\b"), "responder una pregunta"),
+                r"|\ben los comentarios\b|\bacá abajo\b"), "answer a question"),
     (re.compile(r"(?i)\b(?:escribinos|escribime|mandanos|mandame|consultanos)\b"
                 r"|\bpor (?:el )?privado\b|\bal privado\b|\bpor mensaje privado\b"),
-     "escribir por privado"),
-    (re.compile(r"(?i)\bguard[áa](?:lo|la)?\b"), "guardar el posteo"),
-    (re.compile(r"(?i)\bcompart[í i](?:lo|la)?\b|\bmand[áa]selo\b"), "compartir"),
-    (re.compile(r"(?i)\b(?:seguinos|seguime|seguí nos)\b"), "seguir la cuenta"),
-    (re.compile(r"(?i)\blink en (?:la )?bio\b|\benlace en (?:la )?bio\b"), "link en la bio"),
-    (re.compile(r"(?i)\b(?:pasá|pasate|acercate|vení)\s+(?:por|a)\b"), "pasar por el local"),
+     "DM me"),
+    (re.compile(r"(?i)\bguard[áa](?:lo|la)?\b"), "save this"),
+    (re.compile(r"(?i)\bcompart[í i](?:lo|la)?\b|\bmand[áa]selo\b"), "share this"),
+    (re.compile(r"(?i)\b(?:seguinos|seguime|seguí nos)\b"), "follow"),
+    (re.compile(r"(?i)\blink en (?:la )?bio\b|\benlace en (?:la )?bio\b"), "link in bio"),
+    (re.compile(r"(?i)\b(?:pasá|pasate|acercate|vení)\s+(?:por|a)\b"), "visit in person"),
 ]
 
 FILLER_TAGS = {"#viral", "#fyp", "#explore", "#explorepage", "#foryou", "#foryoupage",
