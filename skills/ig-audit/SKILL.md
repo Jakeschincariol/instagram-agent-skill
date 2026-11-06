@@ -19,7 +19,9 @@ The user's own last 30 posts are the evidence.
 Ask for whichever the user has:
 
 - Insights per post: views, reach, interactions, watch time, saves, shares,
-  follows, and the non-follower share of reach. Screenshots are fine.
+  follows, skip rate, and the non-follower share of reach. Screenshots are
+  fine. Skip rate is on every reel's insights: the share of viewers who
+  swiped away in the first 3 seconds.
 - Or the retention graph for their best and worst recent reels. This one
   screenshot is worth more than the rest combined.
 - Or just the posts and their view counts, which is enough for a first pass.
@@ -37,7 +39,7 @@ and show the working:
 | --- | --- | --- |
 | **Outlier multiple** | views / the account's own median views | whether this was a real hit or a normal day |
 | **Non-follower reach** | % of reach from people who do not follow | whether it travelled at all |
-| **Hold at 3s** | viewers still there at 3s / viewers who started | whether the hook worked. This is the hook's grade. |
+| **Skip rate** | `reels_skip_rate` in insights: % who skip in the first 3s. Hold at 3s is 100 minus skip rate. | whether the hook worked. This is the hook's grade. Lower is better. |
 | **Average watch time** | straight from insights | whether the middle worked |
 | **Sends per reach** | shares / reach | the strongest single signal you can earn. A send is a person putting their name on it. |
 | **Follows per reach** | follows / reach | whether the profile converted the attention |

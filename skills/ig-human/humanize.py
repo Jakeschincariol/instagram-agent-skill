@@ -38,6 +38,7 @@ LEX = os.path.join(HERE, "slop.json")
 
 URL_RE = re.compile(r"https?://\S+|www\.\S+|\S+@\S+\.\S+")
 SENT_RE = re.compile(r"[^.!?\n]+[.!?]*")
+GAP = "\x01"             # where a deleted phrase used to be
 
 
 def load_lexicon(path=LEX):
@@ -126,6 +127,16 @@ def _match_case(src, repl):
     return repl
 
 
+def phrase_pattern(find):
+    """Match a lexicon entry as a whole phrase. The \\b goes only on an edge
+    that is a word character: "what are your thoughts?" ends on a "?", and a
+    \\b after it never matches at the end of a line."""
+    body = re.escape(find).replace(r"\ ", r"\s+")
+    head = r"\b" if re.match(r"\w", find) else ""
+    tail = r"\b" if re.search(r"\w$", find) else ""
+    return re.compile(head + body + tail, re.IGNORECASE)
+
+
 def pass_lexical(text, lex):
     """Replace slop words and phrases. Longest first so phrases win."""
     hits = []
@@ -133,18 +144,28 @@ def pass_lexical(text, lex):
                      key=lambda e: len(e["find"]), reverse=True)
     for entry in entries:
         find = entry["find"]
-        pattern = re.compile(r"\b" + re.escape(find).replace(r"\ ", r"\s+") + r"\b",
-                             re.IGNORECASE)
+        pattern = phrase_pattern(find)
         found = pattern.findall(text)
         if not found:
             continue
         hits.append({"find": find, "replace": entry["replace"] or "(deleted)",
                      "count": len(found), "family": entry["family"]})
-        text = pattern.sub(lambda m: _match_case(m.group(0), entry["replace"]), text)
+        # A deletion leaves a marker, so the cleanup below knows exactly where
+        # a phrase came out and only touches punctuation next to the gap.
+        text = pattern.sub(lambda m: _match_case(m.group(0), entry["replace"]) or GAP, text)
     # Clean up after deletions. Deleting a whole clause leaves orphaned
-    # punctuation behind ("system. ." or a line that now opens on a comma),
-    # and that reads worse than the slop did.
+    # punctuation behind ("system. .", "me.!", "this, 👇" or a line that now
+    # opens on a comma), and that reads worse than the slop did.
+    text = re.sub(r"[ \t]*" + GAP + r"(?:[ \t]*" + GAP + r")*[ \t]*", GAP, text)
+    # The deleted sentence's own end mark goes with it: "me. GAP!" -> "me."
+    text = re.sub(r"(?m)(^|[.!?])" + GAP + r"[ \t]*[.!?,;:]+", r"\1" + GAP, text)
+    # A comma that led into the deleted clause goes, and so does a comma left
+    # in front of nothing but an emoji or the end of the line.
+    text = re.sub(r"[,;:]" + GAP + r"(?=[ \t]*[.!?,;:])", GAP, text)
+    text = re.sub(r"(?m)[,;:]" + GAP + r"(?=[^\w\n.!?,;:]*$)", GAP, text)
+    text = text.replace(GAP, " ")
     text = re.sub(r"[ \t]{2,}", " ", text)
+    text = re.sub(r"(?m)[ \t]+$", "", text)
     text = re.sub(r"(?m)^[ \t]*(?:[,.;:]+[ \t]*)+", "", text)
     text = re.sub(r"(?m)^[ \t](?=\S)", "", text)       # one space left by a deletion.
                                                       # Deeper indents are deliberate.
@@ -199,7 +220,8 @@ def restore_capitals(original, text):
     starts = re.findall(r"(?:^|[.!?]\s+|\n)\s*([A-Za-z])", original)
     if not starts or sum(1 for c in starts if c.isupper()) * 2 < len(starts):
         return text
-    return re.sub(r"(?:^|(?<=[.!?] )|(?<=[.!?]\n)|(?<=\n))\s*([a-z])",
+    # An ellipsis is a pause, not a sentence end: "So... it worked" stays.
+    return re.sub(r"(?:^|(?<=[.!?] )(?<!\.\.\. )|(?<=[.!?]\n)|(?<=\n))\s*([a-z])",
                   lambda m: m.group(0)[:-1] + m.group(1).upper(), text)
 
 

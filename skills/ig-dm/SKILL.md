@@ -90,6 +90,12 @@ reaches both audiences, which is the strongest single growth mechanic on
 Instagram that does not involve paying anybody. Pitch it as that and be
 concrete about who does what.
 
+**Disclosure, if money or product changes hands.** Say in the pitch that the
+post will carry Instagram's "Paid partnership" label. It is required for
+sponsored posts, and it can be set at publish through the API since April
+2026. If the post will use realistic AI-made images, video or voice, it also
+gets Instagram's AI label. Text written with AI help does not need one.
+
 ## Follow-ups
 
 Two. That is the number.

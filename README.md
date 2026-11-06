@@ -310,6 +310,12 @@ your name. If a draft needs a number you have not given, it comes back with
 until the fact got checked. If something here contradicts what Instagram is
 doing when you read it, Instagram is right.
 
+The numbers now live in one place: [`platform.json`](platform.json) at the
+repo root. Hashtag cap, caption limit, feed cut, carousel size, safe zones and
+Reel length, each with the date it was last checked and a source where there
+is one. `caption.py` reads its limits from it. When Instagram moves a number,
+change it there.
+
 ## Files
 
 ```
@@ -323,6 +329,7 @@ skills/ig-human/humanize.py        the three cleaning passes
 skills/ig-human/detect.py          the five-check panel
 skills/ig-viral/swipe.py           outlier ranking and formula classification
 skills/ig-profile/rubric.json      the 100-point profile score
+platform.json                      dated platform numbers the scripts read
 templates/voice.md                 your voice profile. Fill this in first.
 ```
 

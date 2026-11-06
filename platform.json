@@ -1,0 +1,69 @@
+{
+  "note": "Platform numbers the skills and scripts rely on, in one place. Each fact says when it was last checked against Instagram. When Instagram changes one, change it here and the scripts follow. If this file and Instagram disagree, Instagram is right.",
+  "checked": "2026-10-15",
+  "facts": {
+    "hashtag_cap": {
+      "value": 5,
+      "unit": "hashtags per post or reel",
+      "since": "2025-12-18",
+      "was": 30,
+      "checked": "2026-10-15",
+      "source": null,
+      "source_note": "Announced by the @Creators account: use up to 5 targeted hashtags.",
+      "used_by": ["skills/ig-caption/caption.py", "skills/ig-caption/SKILL.md"]
+    },
+    "caption_limit": {
+      "value": 2200,
+      "unit": "characters",
+      "checked": "2026-10-15",
+      "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+      "used_by": ["skills/ig-caption/caption.py", "skills/ig-caption/SKILL.md"]
+    },
+    "feed_truncation": {
+      "value": 125,
+      "unit": "characters shown before \"... more\", approximate",
+      "checked": "2026-10-15",
+      "source": null,
+      "source_note": "Not published by Instagram. It moves with device, font size and line breaks, so treat it as a margin.",
+      "used_by": ["skills/ig-caption/caption.py", "skills/ig-caption/SKILL.md"]
+    },
+    "carousel": {
+      "max_items": 20,
+      "width": 1080,
+      "height": 1350,
+      "aspect": "4:5",
+      "checked": "2026-10-15",
+      "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+      "used_by": ["skills/ig-carousel/SKILL.md"]
+    },
+    "reel_safe_zone": {
+      "frame": [1080, 1920],
+      "top_clear_px": 230,
+      "bottom_y": 1440,
+      "right_clear_px": 230,
+      "checked": "2026-10-15",
+      "source": null,
+      "source_note": "Working numbers from skills/ig-reel/SKILL.md. Nothing above y=230 or below y=1440, right 230 px clear.",
+      "used_by": ["skills/ig-reel/SKILL.md"]
+    },
+    "story_safe_zone": {
+      "frame": [1080, 1920],
+      "top_clear_px": 250,
+      "bottom_y": 1600,
+      "checked": "2026-10-15",
+      "source": null,
+      "source_note": "Working numbers from skills/ig-story/SKILL.md. Nothing above y=250 or below y=1600.",
+      "used_by": ["skills/ig-story/SKILL.md"]
+    },
+    "reel_max_length": {
+      "value": 180,
+      "unit": "seconds",
+      "since": "2025-01",
+      "was": 90,
+      "checked": "2026-10-15",
+      "source": null,
+      "source_note": "Instagram raised the Reel limit to 3 minutes in January 2025.",
+      "used_by": ["skills/ig-reel/SKILL.md"]
+    }
+  }
+}

@@ -31,10 +31,35 @@ import os
 import re
 import statistics
 import sys
+import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOOKS = os.path.join(HERE, "..", "ig-reel", "hooks.json")
-WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
+
+
+def _mark_class():
+    """Every combining mark in the BMP, as the inside of a regex class.
+
+    Devanagari vowel signs, Arabic harakat and decomposed accents are
+    category M, which \\w does not match. Without them a Hindi word breaks
+    into pieces at every vowel sign. ZWNJ and ZWJ sit inside words in Urdu,
+    Persian and the Indic scripts, so they count as part of a word too.
+    """
+    ranges, start, prev = [], None, None
+    for cp in range(0x0300, 0x10000):
+        if unicodedata.category(chr(cp))[0] == "M":
+            start = cp if start is None else start
+            prev = cp
+        elif start is not None:
+            ranges.append((start, prev))
+            start = None
+    return "".join(re.escape(chr(a)) + ("-" + re.escape(chr(b)) if b > a else "")
+                   for a, b in ranges) + "\u200c\u200d"
+
+
+MARKS = _mark_class()
+# Same word rule as hookscore.py: any script, marks kept inside the word.
+WORD_RE = re.compile(r"(?:[^\W_]|[$%'’\-" + MARKS + r"])+")
 
 try:                                              # optional: score the hooks too
     sys.path.insert(0, os.path.join(HERE, "..", "ig-reel"))

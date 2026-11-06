@@ -21,6 +21,10 @@ One tool lives in this folder and it runs:
 python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
 ```
 
+The `swipe.py` classifier reads English and Rioplatense Spanish: all 26
+`match` patterns in hooks.json carry both variants. Do not translate a hook
+to classify it, pass it through as it was said.
+
 ## The one idea that makes this worth doing
 
 **Raw views are not evidence.** An account with two million followers doing
@@ -52,8 +56,14 @@ most relevant corpus that exists and it is already filtered by their taste.
 
 Use whatever browsing tool this session actually has: an in-app browser, a
 browser extension connected to the user's own Chrome, or a computer-use tool.
-There is no API for this and there does not need to be, because the volume is
+Browsing by hand is fine at this volume. Ten accounts, a dozen reels each, is
 small enough to read.
+
+If the user wants view counts at scale, there is an official way. Since June
+2025 Meta's Business Discovery API returns other professional accounts' Reel
+`view_count`. It needs the Instagram API with Facebook Login and a Facebook
+Page linked to the user's professional account. That is the compliant route.
+Never scrape.
 
 **Rules that are not negotiable:**
 

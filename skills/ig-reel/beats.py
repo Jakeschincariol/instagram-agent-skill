@@ -25,21 +25,80 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
 
-WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
-SENT_RE = re.compile(r"[^.!?]+[.!?]*")
-CONCRETE_RE = re.compile(r"\$\s?\d|\b\d[\d,.]*\b|(?<!^)\b[A-Z][a-z]{2,}\b", re.MULTILINE)
+
+def _mark_class():
+    """Every combining mark in the BMP, as the inside of a regex class.
+
+    Devanagari vowel signs, Arabic harakat and decomposed accents are
+    category M, which \\w does not match. Without them a Hindi word breaks
+    into pieces at every vowel sign. ZWNJ and ZWJ sit inside words in Urdu,
+    Persian and the Indic scripts, so they count as part of a word too.
+    """
+    ranges, start, prev = [], None, None
+    for cp in range(0x0300, 0x10000):
+        if unicodedata.category(chr(cp))[0] == "M":
+            start = cp if start is None else start
+            prev = cp
+        elif start is not None:
+            ranges.append((start, prev))
+            start = None
+    return "".join(re.escape(chr(a)) + ("-" + re.escape(chr(b)) if b > a else "")
+                   for a, b in ranges) + "\u200c\u200d"
+
+
+MARKS = _mark_class()
+# Letters and digits in any script, plus the marks that belong to them, plus
+# the $ % ' ’ - that the English version always kept inside a word.
+WORD_RE = re.compile(r"(?:[^\W_]|[$%'’\-" + MARKS + r"])+")
+# Sentence ends in Hindi (danda) and Urdu (full stop, question mark) too.
+SENT_RE = re.compile(r"[^.!?\u0964\u0965\u06d4\u061f]+[.!?\u0964\u0965\u06d4\u061f]*")
+CONCRETE_RE = re.compile(
+    r"\$\s?\d|\b\d[\d,.]*\b"
+    # Proper noun: case-sensitive on purpose. Under a global IGNORECASE
+    # flag [A-Z] matches any letter and every line looks concrete.
+    r"|(?<!^)\b[A-ZÁÉÍÓÚÑ][a-záéíóúñü]{2,}\b"
+    # Numbers said in Spanish, scoped so the flag cannot leak upward.
+    r"|(?i:\b(?:dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|"
+    r"quince|veinte|treinta|cuarenta|cincuenta|cien|mil|millón|millones|"
+    r"docena|mitad|doble|triple|pesos|dólares|kilos?|gramos?)\b)",
+    re.MULTILINE)
 STOPWORDS = {
     "the", "a", "an", "and", "or", "but", "if", "of", "to", "in", "on", "for",
     "with", "that", "this", "it", "is", "are", "was", "were", "be", "been",
     "you", "your", "i", "my", "me", "we", "our", "they", "them", "he", "she",
     "so", "just", "not", "no", "do", "did", "does", "have", "has", "had",
     "will", "can", "at", "as", "by", "from", "out", "up", "off", "one", "all",
+    # Spanish
+    "el", "la", "los", "las", "un", "una", "unos", "unas", "lo", "al", "del",
+    "de", "que", "y", "o", "pero", "si", "en", "con", "por", "para", "sin",
+    "es", "son", "era", "ser", "está", "están", "hay", "tiene", "tienen",
+    "se", "su", "sus", "mi", "mis", "tu", "tus", "vos", "te", "me", "nos",
+    "yo", "él", "ella", "ellos", "ellas", "esto", "esta", "este", "eso",
+    "esa", "ese", "no", "ni", "más", "muy", "ya", "así", "acá", "ahí",
+    "cuando", "como", "porque", "todo", "toda", "todos", "todas",
 }
 
 HOOK_WINDOW = 3.0        # seconds. Past this, the thumb has already decided.
 MAX_BEAT = 4.0           # seconds on one idea with no change on screen.
 ABSTRACT_RUN = 3         # beats in a row with nothing checkable in them.
+
+
+def non_latin(text):
+    """True when most letters are not Latin. Names are found by their capital
+    letter, which Devanagari and Arabic do not have, so on those scripts a
+    beat with no digits is "unknown", not "abstract"."""
+    letters = [c for c in text if c.isalpha()]
+    if not letters:
+        return False
+    latin = sum(1 for c in letters if unicodedata.name(c, "").startswith("LATIN"))
+    return latin * 2 < len(letters)
+
+
+def concrete(text):
+    n = len(CONCRETE_RE.findall(text))
+    return None if n == 0 and non_latin(text) else n
 
 
 def words(text):
@@ -98,7 +157,7 @@ def analyse(raw, wpm=165, target=None):
             "dur": round(dur, 2),
             "words": n,
             "text": text,
-            "concrete": len(CONCRETE_RE.findall(text)),
+            "concrete": concrete(text),
             "label": "",
             "flags": [],
         })
@@ -124,6 +183,9 @@ def analyse(raw, wpm=165, target=None):
     if rows[0]["concrete"] == 0:
         notes.append("Beat 1 has no number and no name in it. Hooks without something "
                      "checkable are the ones that get scrolled.")
+    elif rows[0]["concrete"] is None:
+        notes.append("Beat 1 has no number in it. Names can only be spotted by their "
+                     "capital letter, so check this script for one yourself.")
 
     for r in rows:
         if r["dur"] > MAX_BEAT:
@@ -142,7 +204,7 @@ def analyse(raw, wpm=165, target=None):
             if run == ABSTRACT_RUN:
                 notes.append(f"Beats {start}-{r['n']} have nothing concrete in them. "
                              "Put a number, a name or a price in one of them.")
-        else:
+        else:                       # concrete, or unknown in this script
             run, start = 0, None
 
     # Does the last line hand you back to the first one?

@@ -49,6 +49,13 @@ this week, the format, and the hook formula number from `ig-reel/hooks.json`.
 Not a topic, an angle. "AI" is not a plan. "The proposal we lost because the
 draft had an em dash in it" is a Reel.
 
+**A trial slot.** If the user wants to try a new format, a new theme or a
+voice they have not used, put it in as a Trial Reel. Trial Reels go to
+non-followers first and stay off the main feed and the grid unless the user
+shares them. So a miss costs nothing with the people who already follow. Mark
+the slot "trial" in the plan. If it is a hook-against-hook test, post both
+hooks as separate Trial Reels and compare skip rate and shares after 24 hours.
+
 ## When to post
 
 Post when the user's audience is awake and not at work. For most consumer
@@ -72,7 +79,8 @@ Anchor times to the audience's timezone, not the user's, if those differ.
 - **2 buyers** - people who could actually buy. Comment for weeks before any
   DM, and never pitch in a comment.
 
-Hand the list to `/ig-comment`.
+Hand the list to `/ig-comment`. If `~/.claude/instagram/engaged.md` exists,
+read it first, so the list is not the same ten accounts as last week.
 
 ## Output
 

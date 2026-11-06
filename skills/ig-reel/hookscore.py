@@ -35,15 +35,40 @@ import json
 import re
 import statistics
 import sys
+import unicodedata
 
-WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
+
+def _mark_class():
+    """Every combining mark in the BMP, as the inside of a regex class.
+
+    Devanagari vowel signs, Arabic harakat and decomposed accents are
+    category M, which \\w does not match. Without them a Hindi word breaks
+    into pieces at every vowel sign. ZWNJ and ZWJ sit inside words in Urdu,
+    Persian and the Indic scripts, so they count as part of a word too.
+    """
+    ranges, start, prev = [], None, None
+    for cp in range(0x0300, 0x10000):
+        if unicodedata.category(chr(cp))[0] == "M":
+            start = cp if start is None else start
+            prev = cp
+        elif start is not None:
+            ranges.append((start, prev))
+            start = None
+    return "".join(re.escape(chr(a)) + ("-" + re.escape(chr(b)) if b > a else "")
+                   for a, b in ranges) + "\u200c\u200d"
+
+
+MARKS = _mark_class()
+# Letters and digits in any script, plus the marks that belong to them, plus
+# the $ % ' ’ - that the English version always kept inside a word.
+WORD_RE = re.compile(r"(?:[^\W_]|[$%'’\-" + MARKS + r"])+")
 NUMBER_RE = re.compile(
     r"\$\s?\d[\d,]*(?:\.\d+)?"                       # money, whole
     r"|\b\d[\d,]*(?:\.\d+)?\s?"                      # a figure, with or
     r"(?:%|k\b|x\b|hrs?\b|hours?\b|mins?\b|minutes?\b"  # without a unit
     r"|days?\b|weeks?\b|months?\b|years?\b)?",
     re.IGNORECASE)
-PROPER_RE = re.compile(r"(?<!^)\b[A-Z][a-z]{2,}\b")
+PROPER_RE = re.compile(r"(?<!^)\b[A-ZÁÉÍÓÚÑ][a-záéíóúñü]{2,}\b")
 HASHTAG_RE = re.compile(r"(?:^|\s)#\w+")
 EMOJI_RE = re.compile(r"[\U0001F300-\U0001FAFF☀-➿]")
 
@@ -109,8 +134,120 @@ DEALBREAKERS = [
 ]
 
 
+# Rioplatense Spanish.
+#
+# The five checks above were written against English word lists, so a hook
+# written in Spanish scored WEAK however good it was: "cinco veces" was not a
+# number and "pará" was not tension. These sets extend the English ones rather
+# than replacing them, so both languages score and neither regresses.
+#
+# Voseo throughout, because that is how the hook gets said out loud here.
+# Accents are kept meaningful: "pará" (stop) is tension, "para" (for) is a
+# preposition, and collapsing the two would put a tension marker in every line.
+# ---------------------------------------------------------------------------
+
+SPOKEN_NUMBERS_ES = {
+    "cero", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho",
+    "nueve", "diez", "once", "doce", "quince", "veinte", "treinta",
+    "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa",
+    "cien", "ciento", "mil", "millón", "millon", "millones", "docena",
+    "decena", "media", "mitad", "doble", "triple",
+}
+
+MONEY_WORDS_ES = {
+    "pesos", "peso", "dólares", "dolares", "dólar", "dolar", "mangos",
+    "guita", "luca", "lucas", "palo", "palos", "centavos", "plata",
+    "porciento", "ganancia", "facturación", "sueldo", "alquiler",
+    "descuento", "precio", "presupuesto",
+}
+
+STAKES_ES = {
+    # frenar, negar
+    "pará", "pare", "frena", "frená", "nunca", "jamás", "jamas", "nadie",
+    "ninguno", "ninguna", "ni", "tampoco", "sin", "nada",
+    # error y pérdida
+    "mal", "error", "errores", "equivocado", "equivocada", "equivocas",
+    "perdí", "perder", "perdiendo", "perdés", "perdiste", "pérdida",
+    "cuesta", "costó", "costo", "roto", "rota", "arruina", "arruinás",
+    "arruinar", "fracasó", "fracaso", "falla", "fallé", "daña", "dañar",
+    "lastima", "enferma", "tóxico", "toxico", "venenoso",
+    # plata y trueque
+    "gratis", "pagué", "pagar", "pagás", "cobré", "ahorré", "ahorrás",
+    "ahorrar", "regalado", "carito", "caro", "barato",
+    # revelación
+    "verdad", "mito", "mentira", "mentí", "mienten", "secreto", "escondido",
+    "oculto", "prohibido", "ilegal", "estafa", "trampa",
+    # juicio
+    "peor", "odio", "odiás", "desperdicio", "desperdiciás",
+    # giro
+    "antes", "hasta", "salvo", "pero", "excepto", "igual", "encima",
+    "realmente", "todavía", "todavia", "ya", "recién", "recien",
+    "problema", "riesgo", "peligro", "cuidado", "ojo", "advertencia",
+    "arrepentí", "deberías", "deberia", "debería", "contra", "versus",
+    "dejá", "dejar", "borrá", "borrar", "cortá", "primero",
+}
+
+WEAK_OPENERS_ES = [
+    "bueno", "ok", "okey", "oka", "hola", "holis", "buenas", "che",
+    "chicos", "chicas", "gente", "amigos", "bienvenidos", "bienvenidas",
+    "hoy", "básicamente", "basicamente", "sinceramente", "la verdad",
+    "mirá que", "escuchen", "escuchá que", "o sea", "digamos", "nada",
+    "quería", "quiero", "les quiero", "les voy", "te voy", "uno de",
+    "una de", "en este", "en el", "esto es", "acá les", "acá te",
+    "esta es", "este es", "resulta que", "les cuento", "te cuento",
+]
+
+IMPERATIVES_ES = {
+    "pará", "mirá", "mira", "escuchá", "probá", "guardá", "usá",
+    "hacé", "armá", "escribí", "mandá", "llevá", "empezá", "dejá",
+    "fijate", "acordate", "anotá", "copiá", "robá", "borrá", "comprá",
+    "vení", "dale", "pedí", "elegí", "leé", "contá", "sumá", "revisá",
+    "ojo", "nunca", "siempre", "no", "andá", "sacá", "poné", "tené",
+}
+
+SPOKEN_NUMBERS |= SPOKEN_NUMBERS_ES
+MONEY_WORDS |= MONEY_WORDS_ES
+STAKES |= STAKES_ES
+IMPERATIVES |= IMPERATIVES_ES
+WEAK_OPENERS = WEAK_OPENERS + WEAK_OPENERS_ES
+
+DEALBREAKERS += [
+    (re.compile(r"(?i)^\s*[¿¡]?\s*(?:no pares de scrollear|pará de scrollear"
+                r"|no sigas scrolleando|freu?ná el scroll)"),
+     "Abre pidiendo atención. Si la tuvieras no haría falta pedirla."),
+    (re.compile(r"(?i)\b(?:en este (?:video|reel)|en el video de hoy"
+                r"|te voy a (?:mostrar|contar|enseñar)"
+                r"|les voy a (?:mostrar|contar|enseñar)"
+                r"|hoy les traigo|hoy te traigo)\b"),
+     "Preámbulo de video. Borralo y abrí directo en lo que promete."),
+    (re.compile(r"(?i)^\s*[¿¡]?\s*(?:hola|holis|buenas|qué onda|que onda|che\b"
+                r"|bienvenid[oa]s)"),
+     "Saludo. Nadie entra al feed para que lo saluden."),
+]
+
+
+
+
 def clamp(n):
     return max(0.0, min(100.0, n))
+
+
+def non_latin(text):
+    """True when most letters are not Latin: Devanagari, Arabic, Cyrillic.
+
+    The word lists below (stakes, openers, pronouns, spoken numbers) are
+    English, and the name check needs capitals. On a script they cannot read,
+    those checks go neutral instead of scoring the line as if it said nothing.
+    """
+    letters = [c for c in text if c.isalpha()]
+    if not letters:
+        return False
+    latin = sum(1 for c in letters if unicodedata.name(c, "").startswith("LATIN"))
+    return latin * 2 < len(letters)
+
+
+NA = 50.0                # a check that cannot read this script. Neutral: it
+                         # counts in the average, never as the weakest check.
 
 
 def words(text):
@@ -142,6 +279,8 @@ def check_specificity(text):
     low = [w.lower().strip("'’") for w in words(text)]
     spoken = [w for w in low if w in SPOKEN_NUMBERS or w in MONEY_WORDS]
     hits = len(nums) + len(propers) + len(spoken)
+    if hits == 0 and non_latin(text):
+        return NA, "n/a: no digits, and names and spoken numbers are only read in English"
     score = 15.0 if hits == 0 else clamp(45 + hits * 30)
     found = ", ".join(nums[:2] + sorted(propers)[:2] + spoken[:2])
     return score, (f"{hits} concrete marker(s)" + (f": {found}" if found else
@@ -155,6 +294,8 @@ def check_stakes(text):
     markers = sorted(set(hits))
     if re.search(r"\$\s?\d", text):
         markers.append("a price")
+    if not markers and non_latin(text):
+        return NA, "n/a: the stakes word list is English"
     n = len(markers)
     score = {0: 20.0, 1: 70.0}.get(n, 100.0)
     detail = f"{n} tension marker(s)" + (f": {', '.join(markers[:4])}" if markers else
@@ -168,6 +309,13 @@ def check_frontload(text):
     if not w:
         return 0.0, "empty"
     low = [x.lower().strip("'’") for x in w]
+    if non_latin(text):
+        # Only numbers can be found in a script the word lists do not cover.
+        # A number up front is a payload; no number proves nothing either way.
+        for i, token in enumerate(w[:4]):
+            if NUMBER_RE.match(token):
+                return 100.0, f"payload at word {i + 1}"
+        return NA, "n/a: payload words are only read in English; no number in the first 4 words"
     opener = " ".join(low[:2])
     penalty = 0
     hit_opener = None
@@ -201,13 +349,33 @@ def check_address(text):
     """Aimed at one viewer, or floating in the air."""
     low = text.lower()
     w = [x.lower().strip("'’") for x in words(text)]
+    if non_latin(text):
+        return NA, "n/a: pronouns are only read in English"
     if re.search(r"\b(you|your|you're|youre|yourself)\b", low):
+        return 100.0, "speaks to the viewer"
+    # Spanish second person, including the voseo verb forms that carry it
+    # without a pronoun in front. Without this every Spanish hook fell through
+    # to third person and lost the check outright, whoever it was aimed at.
+    if re.search(r"\b(vos|tu|tus|tuyo|tuya|te|ti|usted|ustedes"
+                 r"|ten\u00e9s|quer\u00e9s|pod\u00e9s|sab\u00e9s|hac\u00e9s|sos|viste|dec\u00eds"
+                 r"|compr\u00e1s|pag\u00e1s|perd\u00e9s)\b", low):
         return 100.0, "speaks to the viewer"
     if w and w[0] in IMPERATIVES:
         return 90.0, f"imperative opener (\"{w[0]}\")"
     if re.search(r"\b(i|my|me|we|our)\b", low):
         return 70.0, "first person, no viewer named"
+    if re.search(r"\b(yo|mi|mis|me|nosotros|nuestro|nuestra)\b", low):
+        return 70.0, "first person, no viewer named"
     return 35.0, "third person, nobody in the room"
+
+
+def applies(result):
+    return not result[1].startswith("n/a")
+
+
+def weakest_check(results):
+    pool = [c for c in CHECKS if applies(results[c])] or CHECKS
+    return min(pool, key=lambda c: results[c][0])
 
 
 CHECKS = ["LENGTH", "SPECIFICITY", "STAKES", "FRONTLOAD", "ADDRESS"]
@@ -224,10 +392,12 @@ def run(text):
     flags = [msg for pattern, msg in DEALBREAKERS if pattern.search(text)]
     scores = [results[c][0] for c in CHECKS]
     # The weakest property caps the hook, same logic as detect.py: one bad
-    # property is enough for the thumb to keep moving.
-    overall = statistics.mean(scores) * 0.6 + min(scores) * 0.4 - len(flags) * 15
+    # property is enough for the thumb to keep moving. A check marked n/a
+    # could not read the script, so it is never the weakest one.
+    applied = [results[c][0] for c in CHECKS if applies(results[c])] or scores
+    overall = statistics.mean(scores) * 0.6 + min(applied) * 0.4 - len(flags) * 15
     overall = clamp(overall)
-    verdict = "STRONG" if overall >= 70 and min(scores) >= 55 and not flags else (
+    verdict = "STRONG" if overall >= 70 and min(applied) >= 55 and not flags else (
         "OK" if overall >= 50 else "WEAK")
     return results, overall, verdict, flags
 
@@ -250,7 +420,7 @@ def render_one(text, results, overall, verdict, flags, out=sys.stdout):
     for f in flags:
         print(f"\n  DEALBREAKER  {f}", file=out)
     if verdict != "STRONG":
-        weakest = min(CHECKS, key=lambda c: results[c][0])
+        weakest = weakest_check(results)
         print(f"\n  Weakest property: {weakest}. Fix that one and re-run.", file=out)
     print("", file=out)
 
@@ -290,7 +460,7 @@ def main():
         payload.append({
             "hook": line,
             "checks": {k: {"score": round(v[0], 1), "detail": v[1]} for k, v in results.items()},
-            "weakest": min(CHECKS, key=lambda c: results[c][0]),
+            "weakest": weakest_check(results),
             "flags": flags,
             "score": round(overall, 1),
             "verdict": verdict,

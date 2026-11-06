@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "note": "Lexicon used by humanize.py and detect.py. Replacements are plain-English and keep the sentence grammatical. The last block of each list is Instagram-specific: caption and voiceover slop that does not show up on other platforms. Edit freely - it is meant to be yours.",
+  "note": "Lexicon used by humanize.py and detect.py. Replacements are plain-English and keep the sentence grammatical. The last block of each list is Instagram-specific: caption and voiceover slop that does not show up on other platforms. Edit freely - it is meant to be yours. | A Spanish (es) lexicon sits alongside the English one; those entries carry \"lang\": \"es\". Affectionate or trade vocabulary a person really uses for their own animals or their own work is deliberately absent: flagging the author's own voice is worse than flagging nothing.",
   "invisible": [
     {
       "cp": "U+200B",
@@ -630,6 +630,270 @@
       "find": "hack",
       "replace": "trick",
       "family": "nouns"
+    },
+    {
+      "find": "amantes de los animales",
+      "replace": "los que tienen mascota",
+      "family": "petshop",
+      "lang": "es"
+    },
+    {
+      "find": "amigos de cuatro patas",
+      "replace": "perros y gatos",
+      "family": "petshop",
+      "lang": "es"
+    },
+    {
+      "find": "soluciones integrales",
+      "replace": "soluciones",
+      "family": "nouns",
+      "lang": "es"
+    },
+    {
+      "find": "amigo de cuatro patas",
+      "replace": "perro",
+      "family": "petshop",
+      "lang": "es"
+    },
+    {
+      "find": "un pilar fundamental",
+      "replace": "la base",
+      "family": "nouns",
+      "lang": "es"
+    },
+    {
+      "find": "el bienestar animal",
+      "replace": "la salud de tu mascota",
+      "family": "nouns",
+      "lang": "es"
+    },
+    {
+      "find": "ser de cuatro patas",
+      "replace": "mascota",
+      "family": "petshop",
+      "lang": "es"
+    },
+    {
+      "find": "de primera calidad",
+      "replace": "de buena calidad",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "solución integral",
+      "replace": "solución",
+      "family": "nouns",
+      "lang": "es"
+    },
+    {
+      "find": "fieles compañeros",
+      "replace": "perros",
+      "family": "petshop",
+      "lang": "es"
+    },
+    {
+      "find": "la familia peluda",
+      "replace": "tu mascota",
+      "family": "petshop",
+      "lang": "es"
+    },
+    {
+      "find": "profundizar en",
+      "replace": "ver",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "adentrarnos en",
+      "replace": "entrar en",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "revolucionario",
+      "replace": "nuevo",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "fiel compañero",
+      "replace": "perro",
+      "family": "petshop",
+      "lang": "es"
+    },
+    {
+      "find": "sumergirse en",
+      "replace": "meterse en",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "disponemos de",
+      "replace": "tenemos",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "la excelencia",
+      "replace": "hacer las cosas bien",
+      "family": "nouns",
+      "lang": "es"
+    },
+    {
+      "find": "revolucionar",
+      "replace": "cambiar",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "sumergite en",
+      "replace": "metete en",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "contamos con",
+      "replace": "tenemos",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "garantizamos",
+      "replace": "te aseguramos",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "de alta gama",
+      "replace": "",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "inigualable",
+      "replace": "",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "insuperable",
+      "replace": "",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "excepcional",
+      "replace": "muy bueno",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "innovadora",
+      "replace": "nueva",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "disruptivo",
+      "replace": "nuevo",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "primordial",
+      "replace": "importante",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "potenciar",
+      "replace": "mejorar",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "optimizar",
+      "replace": "mejorar",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "maximizar",
+      "replace": "aprovechar",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "brindamos",
+      "replace": "damos",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "innovador",
+      "replace": "nuevo",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "holístico",
+      "replace": "completo",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "integral",
+      "replace": "completo",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "abordar",
+      "replace": "tratar",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "brindar",
+      "replace": "dar",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "robusto",
+      "replace": "fuerte",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "abanico",
+      "replace": "variedad",
+      "family": "nouns",
+      "lang": "es"
+    },
+    {
+      "find": "elevar",
+      "replace": "mejorar",
+      "family": "verbs",
+      "lang": "es"
+    },
+    {
+      "find": "óptimo",
+      "replace": "mejor",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "idóneo",
+      "replace": "ideal",
+      "family": "adjectives",
+      "lang": "es"
+    },
+    {
+      "find": "sinfín",
+      "replace": "montón",
+      "family": "nouns",
+      "lang": "es"
     }
   ],
   "phrases": [
@@ -922,6 +1186,180 @@
       "find": "go viral overnight",
       "replace": "get reach",
       "family": "nouns"
+    },
+    {
+      "find": "al mejor precio del mercado",
+      "replace": "a buen precio",
+      "family": "claims",
+      "lang": "es"
+    },
+    {
+      "find": "todo lo que necesitás y más",
+      "replace": "todo lo que necesitás",
+      "family": "claims",
+      "lang": "es"
+    },
+    {
+      "find": "es importante destacar que",
+      "replace": "",
+      "family": "connectors",
+      "lang": "es"
+    },
+    {
+      "find": "no dudes en contactarnos",
+      "replace": "escribinos",
+      "family": "cta",
+      "lang": "es"
+    },
+    {
+      "find": "no dudes en consultarnos",
+      "replace": "preguntános",
+      "family": "cta",
+      "lang": "es"
+    },
+    {
+      "find": "experiencia inigualable",
+      "replace": "experiencia",
+      "family": "claims",
+      "lang": "es"
+    },
+    {
+      "find": "vale la pena mencionar",
+      "replace": "",
+      "family": "connectors",
+      "lang": "es"
+    },
+    {
+      "find": "atención personalizada",
+      "replace": "atención",
+      "family": "claims",
+      "lang": "es"
+    },
+    {
+      "find": "para más información",
+      "replace": "",
+      "family": "cta",
+      "lang": "es"
+    },
+    {
+      "find": "la mejor opción para",
+      "replace": "lo mejor para",
+      "family": "claims",
+      "lang": "es"
+    },
+    {
+      "find": "lo mejor de lo mejor",
+      "replace": "lo mejor",
+      "family": "claims",
+      "lang": "es"
+    },
+    {
+      "find": "aprovechá al máximo",
+      "replace": "aprovechá",
+      "family": "cta",
+      "lang": "es"
+    },
+    {
+      "find": "calidad y confianza",
+      "replace": "calidad",
+      "family": "claims",
+      "lang": "es"
+    },
+    {
+      "find": "amplia variedad de",
+      "replace": "variedad de",
+      "family": "claims",
+      "lang": "es"
+    },
+    {
+      "find": "en la era digital",
+      "replace": "hoy",
+      "family": "openers",
+      "lang": "es"
+    },
+    {
+      "find": "cabe destacar que",
+      "replace": "",
+      "family": "connectors",
+      "lang": "es"
+    },
+    {
+      "find": "sin lugar a dudas",
+      "replace": "seguro",
+      "family": "connectors",
+      "lang": "es"
+    },
+    {
+      "find": "experiencia única",
+      "replace": "experiencia",
+      "family": "claims",
+      "lang": "es"
+    },
+    {
+      "find": "en la actualidad",
+      "replace": "hoy",
+      "family": "openers",
+      "lang": "es"
+    },
+    {
+      "find": "sin duda alguna",
+      "replace": "seguro",
+      "family": "connectors",
+      "lang": "es"
+    },
+    {
+      "find": "a la vanguardia",
+      "replace": "adelante",
+      "family": "connectors",
+      "lang": "es"
+    },
+    {
+      "find": "en el mundo de",
+      "replace": "en",
+      "family": "openers",
+      "lang": "es"
+    },
+    {
+      "find": "cabe mencionar",
+      "replace": "",
+      "family": "connectors",
+      "lang": "es"
+    },
+    {
+      "find": "amplia gama de",
+      "replace": "variedad de",
+      "family": "claims",
+      "lang": "es"
+    },
+    {
+      "find": "en conclusión",
+      "replace": "",
+      "family": "connectors",
+      "lang": "es"
+    },
+    {
+      "find": "en definitiva",
+      "replace": "",
+      "family": "connectors",
+      "lang": "es"
+    },
+    {
+      "find": "de la mano de",
+      "replace": "con",
+      "family": "connectors",
+      "lang": "es"
+    },
+    {
+      "find": "hoy en día",
+      "replace": "hoy",
+      "family": "openers",
+      "lang": "es"
+    },
+    {
+      "find": "en resumen",
+      "replace": "",
+      "family": "connectors",
+      "lang": "es"
     }
   ],
   "structures": [
@@ -1020,6 +1458,41 @@
       "regex": "(?i)\\b(?:follow for more|tag someone who|double tap if|share this if|comment below if)\\b",
       "name": "Reflex follow or tag bait",
       "fix": "Ask for the one action this post actually earns. The generic ask trains the audience to ignore every ask."
+    },
+    {
+      "id": "es-no-es-solo",
+      "regex": "(?i)\\bno es s[oó]lo [^.!?\\n]{2,60}[,.] es\\b",
+      "name": "\"No es solo X, es Y\"",
+      "lang": "es",
+      "fix": "Decí la que importa y borrá la mitad del armado."
+    },
+    {
+      "id": "es-no-solo-sino",
+      "regex": "(?i)\\bno s[oó]lo\\b[^.!?\\n]{2,80}\\bsino (?:que )?tambi[eé]n\\b",
+      "name": "\"No solo X sino también Y\"",
+      "lang": "es",
+      "fix": "Partílo en dos frases, o tirá la mitad más floja."
+    },
+    {
+      "id": "es-no-se-trata",
+      "regex": "(?i)\\bno se trata de [^.!?\\n]{2,60}[.!,] se trata de\\b",
+      "name": "\"No se trata de X, se trata de Y\"",
+      "lang": "es",
+      "fix": "Arrancá por Y. El giro es el delator."
+    },
+    {
+      "id": "es-mas-que-un",
+      "regex": "(?i)\\bm[aá]s que un[ao]? [^.!?\\n]{2,50}, es\\b",
+      "name": "\"Más que un X, es un Y\"",
+      "lang": "es",
+      "fix": "Es publicidad de los 90. Decí qué hace."
+    },
+    {
+      "id": "es-ya-sea",
+      "regex": "(?i)\\bya sea [^.!?\\n]{2,40} o\\b",
+      "name": "\"Ya sea X o Y\"",
+      "lang": "es",
+      "fix": "Nombrá a uno solo. El que te compra es uno solo."
     }
   ]
 }

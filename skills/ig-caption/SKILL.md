@@ -95,6 +95,12 @@ python3 caption.py draft.txt --keywords "client proposals,agency pricing"
   4 per 100 characters.
 - **Alt text is worth 20 seconds.** For carousels and photos, write it. It is
   read by screen readers and by Instagram.
+- **Label what needs a label.** A sponsored post uses Instagram's "Paid
+  partnership" label, not just #ad in the caption. It can be set at publish
+  through the API since April 2026. Realistic AI-made images, video or voice
+  get Instagram's AI label (`is_ai_generated` at publish since June 2026).
+  A caption written with AI help does not need one. Say which labels apply in
+  the receipt.
 
 ## The loop
 
