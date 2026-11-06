@@ -1,4 +1,4 @@
-# The Instagram agent skill
+https://l.instagram.com/?u=https%3A%2F%2Fgithub.com%2FJakeschincariol%2Finstagram-agent-skill&e=AUCcS2OhU0hRgHLqBGmClZlaA-hzVd7s03PZXTUYZu3TXHA9ga0Ero_m4hJBSFbemqyZDenvRKI0D7yIT-qTdnKlM331xNNJYilV73cJyg&s=1# The Instagram agent skill
 
 Thirteen Claude skills that run an Instagram account. Free, MIT, no signup, no
 API key, nothing to connect.
