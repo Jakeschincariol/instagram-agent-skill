@@ -199,6 +199,12 @@ def main():
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
+    # Windows pipes default to the ANSI code page (cp1252), which cannot print
+    # an emoji and misreads UTF-8 input. Read and write UTF-8 everywhere.
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
+
     raw = sys.stdin.read() if args.input == "-" else open(args.input, encoding="utf-8").read()
     a = analyse(raw, wpm=args.wpm, target=args.target)
     if not a:

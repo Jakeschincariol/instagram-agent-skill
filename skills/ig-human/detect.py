@@ -198,6 +198,12 @@ def main():
     ap.add_argument("--lexicon", default=LEX)
     args = ap.parse_args()
 
+    # Windows pipes default to the ANSI code page (cp1252), which cannot print
+    # an emoji and misreads UTF-8 input. Read and write UTF-8 everywhere.
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
+
     lex = json.load(open(args.lexicon, encoding="utf-8"))
     read = lambda p: sys.stdin.read() if p == "-" else open(p, encoding="utf-8").read()
 
