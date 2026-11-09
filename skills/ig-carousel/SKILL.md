@@ -88,7 +88,7 @@ copy.
 ```
 CAROUSEL  ·  8 slides
 
-1  COVER   THE $18,000 CLAUSE
+1  COVER   THE \$18,000 CLAUSE
            One line I now put in every contract.
 2  STAKE   I approved the work. They asked for the money back nine days later.
 3          WHAT IT SAYS
