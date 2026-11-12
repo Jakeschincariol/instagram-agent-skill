@@ -310,6 +310,31 @@ your name. If a draft needs a number you have not given, it comes back with
 until the fact got checked. If something here contradicts what Instagram is
 doing when you read it, Instagram is right.
 
+**Korean works, and two checks say when they cannot judge it.** The scripts
+split words on `[A-Za-z0-9]`, which finds nothing in Hangul, so a Korean hook
+counted as one word and every property collapsed to the same score. Korean is
+now measured in syllables at 5.5/sec and converted to the English word count
+that takes the same time to say, so the existing bands stay calibrated and
+Latin text is untouched. `hookscore.py` has Korean markers for stakes, weak
+openers, address and counters; `beats.py` matches loops across particle
+inflection, so `알려줘요` and `알려주는` count as the same word. `BURSTINESS`
+measures Korean sentences in the same converted unit, because eojeol are
+information-dense enough that counting them directly made every Korean draft
+read as machine-even no matter how it was written.
+
+Two checks in `detect.py` are English by construction: `VOICE` reads
+contractions and pronoun density, and Korean has no contractions and drops
+pronouns, so both signals are absent by grammar rather than by machine
+authorship. `SLOP DENSITY` needs a Korean lexicon that does not exist yet. Both
+now report `--` and drop out of the aggregate instead of sitting at 50, where
+they would stop any Korean draft from ever passing. Set your own rate with
+`--wpm` as usual; the Korean syllable rate scales with it.
+
+What is still missing: there is no Korean proper-noun detection, because Hangul
+has no capitalisation to key off. `SPECIFICITY` and the `beats.py` concrete
+check see digits, counters and money words in Korean, but not names, so a line
+carrying only a product or place name reads as abstract.
+
 ## Files
 
 ```
@@ -317,6 +342,7 @@ skills/ig-reel/hooks.json          26 hook formulas: template, example, on-scree
                                    what it is for, how it gets ruined, and a match regex
 skills/ig-reel/hookscore.py        the five-property hook panel
 skills/ig-reel/beats.py            script to timed beat sheet
+skills/ig-reel/kolang.py           Korean measurement and markers (same file in ig-human)
 skills/ig-caption/caption.py       the truncation preview and the caption linter
 skills/ig-human/slop.json          the lexicon: 154 terms, 18 invisible classes, 16 tells
 skills/ig-human/humanize.py        the three cleaning passes
