@@ -76,6 +76,10 @@ STAKES_KO = (
     "손실", "낭비", "사기", "속았", "속지", "포기", "날렸", "날리", "까먹",
     "함정", "착각", "금지", "불가능", "없", "아니", "말고", "마세요", "지마",
     "끊", "짜증", "억울", "놓쳤", "놓치", "뺏", "잘못", "하나도", "전까지",
+    # "않" is the main long-form negation and only ever appears in 않다/않아/
+    # 않은, so it is safe as a bare substring. Without it "좋아지지 않아요"
+    # reads as a line with nothing at stake.
+    "않", "힘들", "불편", "걱정", "두려", "무섭", "아프", "통증", "어쩔",
 )
 STAKES_KO_SOLO = ("안", "못", "왜")
 

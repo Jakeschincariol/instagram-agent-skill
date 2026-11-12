@@ -71,7 +71,16 @@ def words(text):
 
 def check_burstiness(text):
     """Humans vary sentence length hard. Models write even."""
-    lens = [len(s.split()) for s in sentences(text)]
+    if korean(text):
+        # Eojeol are information-dense: four seconds of speech is about eleven
+        # English words but only six eojeol, so eojeol counts have a
+        # structurally narrower spread and would read as even no matter how the
+        # line is written. Convert to the same spoken-equivalent word count
+        # used everywhere else, so the thresholds below stay calibrated.
+        lens = [n for n in (kolang.equiv_words(s) for s in SENT_RE.findall(text))
+                if n > 2]
+    else:
+        lens = [len(s.split()) for s in sentences(text)]
     if len(lens) < 4:
         return 50.0, "too short to judge"
     mean = statistics.mean(lens)

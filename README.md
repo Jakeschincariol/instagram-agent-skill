@@ -317,14 +317,23 @@ now measured in syllables at 5.5/sec and converted to the English word count
 that takes the same time to say, so the existing bands stay calibrated and
 Latin text is untouched. `hookscore.py` has Korean markers for stakes, weak
 openers, address and counters; `beats.py` matches loops across particle
-inflection, so `알려줘요` and `알려주는` count as the same word. Two checks in
-`detect.py` are English by construction: `VOICE` reads contractions and pronoun
-density, and Korean has no contractions and drops pronouns, so both signals are
-absent by grammar rather than by machine authorship. `SLOP DENSITY` needs a
-Korean lexicon that does not exist yet. Both now report `--` and drop out of
-the aggregate instead of sitting at 50, where they would stop any Korean draft
-from ever passing. Set your own rate with `--wpm` as usual; the Korean
-syllable rate scales with it.
+inflection, so `알려줘요` and `알려주는` count as the same word. `BURSTINESS`
+measures Korean sentences in the same converted unit, because eojeol are
+information-dense enough that counting them directly made every Korean draft
+read as machine-even no matter how it was written.
+
+Two checks in `detect.py` are English by construction: `VOICE` reads
+contractions and pronoun density, and Korean has no contractions and drops
+pronouns, so both signals are absent by grammar rather than by machine
+authorship. `SLOP DENSITY` needs a Korean lexicon that does not exist yet. Both
+now report `--` and drop out of the aggregate instead of sitting at 50, where
+they would stop any Korean draft from ever passing. Set your own rate with
+`--wpm` as usual; the Korean syllable rate scales with it.
+
+What is still missing: there is no Korean proper-noun detection, because Hangul
+has no capitalisation to key off. `SPECIFICITY` and the `beats.py` concrete
+check see digits, counters and money words in Korean, but not names, so a line
+carrying only a product or place name reads as abstract.
 
 ## Files
 
