@@ -274,7 +274,7 @@
       "id": 27,
       "name": "Second-Person Diagnosis",
       "template": "Your {thing they own} is {bad state} {right now / and you do not know it}.",
-      "example": "Your vibe-coded app can get sued for $100K before it makes a single sale.",
+      "example": "Your app can cost you $100K before its first sale.",
       "on_screen": "YOUR APP IS LEAKING",
       "best_for": "Cold reach. It conscripts the viewer before they have decided whether they care about the topic, because the subject of the sentence is something they own.",
       "trap": "Diagnosing something the viewer does not own. 'Your enterprise data lake' dies on a feed of hobbyists. Also: no consequence. 'Your prompts are long' is an observation, not a diagnosis.",
