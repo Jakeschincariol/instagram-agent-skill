@@ -32,12 +32,22 @@ import unicodedata
 HERE = os.path.dirname(os.path.abspath(__file__))
 LEX = os.path.join(HERE, "slop.json")
 
+try:
+    import kolang
+    KO = True
+except ImportError:                      # detect.py copied out on its own
+    KO = False
+
 SENT_RE = re.compile(r"[^.!?\n]+[.!?]*")
-WORD_RE = re.compile(r"[A-Za-z']+")
+WORD_RE = re.compile(r"[A-Za-z'가-힣]+")
 CONTRACTIONS = re.compile(r"\b\w+'(?:s|t|re|ve|ll|d|m)\b", re.IGNORECASE)
 PRONOUNS = re.compile(r"\b(i|me|my|mine|we|us|our|you|your)\b", re.IGNORECASE)
 NUMBERS = re.compile(r"\b\d[\d,.]*%?\b|\$\d")
 PROPER = re.compile(r"(?<![.!?]\s)(?<!^)\b[A-Z][a-z]{2,}\b", re.MULTILINE)
+
+
+def korean(text):
+    return KO and kolang.is_korean(text)
 
 
 def clamp(n):
@@ -76,14 +86,21 @@ def check_specificity(text):
     if len(w) < 25:
         return 50.0, "too short to judge"
     per100 = 100 / len(w)
-    hits = len(NUMBERS.findall(text)) + len(set(PROPER.findall(text)))
+    if korean(text):
+        hits = len(kolang.numbers(text))
+        unit = "어절"
+    else:
+        hits = len(NUMBERS.findall(text)) + len(set(PROPER.findall(text)))
+        unit = "words"
     density = hits * per100
     score = scale(density, human=6.0, machine=0.5)
-    return score, f"{hits} concrete markers, {density:.1f} per 100 words (want 4+)"
+    return score, f"{hits} concrete markers, {density:.1f} per 100 {unit} (want 4+)"
 
 
 def check_slop(text, lex):
     """Stock vocabulary density against the lexicon."""
+    if korean(text):
+        return None, "slop.json은 영어 전용 - 한국어 판정 제외"
     w = words(text)
     if not w:
         return 50.0, "empty"
@@ -120,6 +137,10 @@ def check_fingerprint(text):
 
 def check_voice(text, lex):
     """Contractions, person, and the shapes models default to."""
+    if korean(text):
+        # Korean has no contractions and drops pronouns, so both signals this
+        # check reads are absent by grammar, not by machine authorship.
+        return None, "영어 축약형·대명사 기반 - 한국어 판정 제외"
     w = words(text)
     if len(w) < 25:
         return 50.0, "too short to judge"
@@ -161,7 +182,11 @@ def run(text, lex):
     results["SLOP DENSITY"] = check_slop(text, lex)
     results["FINGERPRINT"] = check_fingerprint(text)
     results["VOICE"] = check_voice(text, lex)
-    scores = [results[c][0] for c in CHECKS]
+    # A check that returns None cannot judge this language and is left out of
+    # the aggregate, rather than parked at 50 where it would cap every score.
+    scores = [results[c][0] for c in CHECKS if results[c][0] is not None]
+    if not scores:
+        return results, 50.0, "REVIEW"
     # The weakest check drags the verdict: a detector only needs one signal.
     overall = statistics.mean(scores) * 0.6 + min(scores) * 0.4
     verdict = "PASS" if overall >= 70 and min(scores) >= 55 else (
@@ -180,12 +205,16 @@ def render(results, overall, verdict, label=None, out=sys.stdout):
     print("=" * max(len(title), 62), file=out)
     for name in CHECKS:
         score, detail = results[name]
-        print(f"  {name:<13} {bar(score)} {score:5.1f}", file=out)
+        if score is None:
+            print(f"  {name:<13} {'.' * 24}    --", file=out)
+        else:
+            print(f"  {name:<13} {bar(score)} {score:5.1f}", file=out)
         print(f"  {'':<13} {detail}", file=out)
     print("-" * 62, file=out)
     print(f"  {'HUMAN SCORE':<13} {bar(overall)} {overall:5.1f}   {verdict}", file=out)
-    if verdict != "PASS":
-        weakest = min(CHECKS, key=lambda c: results[c][0])
+    judged = [c for c in CHECKS if results[c][0] is not None]
+    if verdict != "PASS" and judged:
+        weakest = min(judged, key=lambda c: results[c][0])
         print(f"\n  Weakest signal: {weakest}. Fix that first.", file=out)
     print("", file=out)
 
@@ -210,7 +239,8 @@ def main():
         results, overall, verdict = run(text, lex)
         payload.append({
             "source": name,
-            "checks": {k: {"score": round(v[0], 1), "detail": v[1]} for k, v in results.items()},
+            "checks": {k: {"score": None if v[0] is None else round(v[0], 1),
+                           "detail": v[1]} for k, v in results.items()},
             "human_score": round(overall, 1),
             "verdict": verdict,
         })

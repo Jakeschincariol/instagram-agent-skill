@@ -36,7 +36,7 @@ import re
 import statistics
 import sys
 
-WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
+WORD_RE = re.compile(r"[A-Za-z0-9가-힣$%'’-]+")
 NUMBER_RE = re.compile(
     r"\$\s?\d[\d,]*(?:\.\d+)?"                       # money, whole
     r"|\b\d[\d,]*(?:\.\d+)?\s?"                      # a figure, with or
@@ -109,6 +109,29 @@ DEALBREAKERS = [
 ]
 
 
+try:
+    import kolang
+    KO = True
+except ImportError:                      # hookscore.py copied out on its own
+    KO = False
+
+if KO:
+    DEALBREAKERS += [
+        (re.compile("^ *(?:안녕|반갑)"),
+         "인사로 여는 훅. 피드에 인사받으러 온 사람은 없습니다."),
+        (re.compile("스크롤|잠깐만|잠시만|주목해"),
+         "주의를 달라고 부탁하는 문장. 부탁해야 한다면 아직 훅이 아닙니다."),
+        (re.compile("(?:이번|이|오늘) *(?:영상|릴스)에서는|알려드리겠습니다"),
+         "예고 문장. 지우고 본내용으로 시작하세요."),
+        (re.compile("구독|좋아요 눌러|알림 설정"),
+         "훅에 진 부탁. 요청은 마지막에 하나만."),
+    ]
+
+
+def korean(text):
+    return KO and kolang.is_korean(text)
+
+
 def clamp(n):
     return max(0.0, min(100.0, n))
 
@@ -120,6 +143,22 @@ def words(text):
 
 def check_length(text):
     """A hook has to land before the thumb moves. Roughly two seconds."""
+    if korean(text):
+        # Measured in syllables, then converted to the English word count that
+        # takes the same time to say, so the bands below stay calibrated.
+        secs = kolang.duration(text)
+        n_eq = max(1, round(secs * 2.75))
+        if 5 <= n_eq <= 12:
+            score = 100.0
+        elif n_eq < 5:
+            score = clamp(100 - (5 - n_eq) * 20)
+        else:
+            score = clamp(100 - (n_eq - 12) * 11)
+        if kolang.display_width(text) > 60:
+            score -= 12
+        return clamp(score), (f"{len(kolang.eojeol(text))}어절 "
+                              f"{kolang.syllables(text)}음절, ~{secs:.1f}s spoken "
+                              "(want 1.8-4.4s)")
     w = words(text)
     n = len(w)
     secs = n / 2.75                      # ~165 words per minute, spoken
@@ -137,7 +176,13 @@ def check_length(text):
 
 def check_specificity(text):
     """One concrete thing beats three abstract ones."""
-    nums = [n.strip() for n in NUMBER_RE.findall(text) if n.strip()]
+    if korean(text):
+        found = kolang.numbers(text)
+        score = 15.0 if not found else clamp(45 + len(found) * 30)
+        return score, (f"{len(found)} concrete marker(s)" +
+                       (f": {', '.join(found[:3])}" if found else
+                        " - 숫자도 이름도, 확인할 수 있는 것이 없음"))
+    nums =[n.strip() for n in NUMBER_RE.findall(text) if n.strip()]
     propers = set(PROPER_RE.findall(text))
     low = [w.lower().strip("'’") for w in words(text)]
     spoken = [w for w in low if w in SPOKEN_NUMBERS or w in MONEY_WORDS]
@@ -150,6 +195,12 @@ def check_specificity(text):
 
 def check_stakes(text):
     """Tension, cost, negation. Something the viewer might lose."""
+    if korean(text):
+        markers = kolang.stakes(text)
+        score = {0: 20.0, 1: 70.0}.get(len(markers), 100.0)
+        return clamp(score), (f"{len(markers)} tension marker(s)" +
+                              (f": {', '.join(markers[:4])}" if markers else
+                               " - 걸린 것이 없는 문장"))
     w = [x.lower().strip("'’") for x in words(text)]
     hits = [x for x in w if x in STAKES]
     markers = sorted(set(hits))
@@ -164,6 +215,24 @@ def check_stakes(text):
 
 def check_frontload(text):
     """The interesting word cannot be in position nine."""
+    if korean(text):
+        # Korean says in two eojeol what English says in four words, so the
+        # positional thresholds are halved.
+        toks = kolang.eojeol(text)
+        if not toks:
+            return 0.0, "empty"
+        weak = kolang.weak_opener(text)
+        payload = kolang.payload_index(text)
+        if payload is None:
+            base, where = 30.0, "핵심어가 문장 어디에도 없음"
+        elif payload <= 1:
+            base, where = 100.0, f"핵심어가 {payload + 1}번째 어절"
+        elif payload <= 3:
+            base, where = 70.0, f"핵심어가 {payload + 1}번째 어절, 당길 수 있음"
+        else:
+            base, where = 40.0, f"핵심어가 {payload + 1}번째 어절, 너무 뒤"
+        return clamp(base - (30 if weak else 0)), (
+            where + (f'; 약한 시작 "{weak}"' if weak else ""))
     w = words(text)
     if not w:
         return 0.0, "empty"
@@ -199,6 +268,8 @@ def check_frontload(text):
 
 def check_address(text):
     """Aimed at one viewer, or floating in the air."""
+    if korean(text):
+        return kolang.address(text)
     low = text.lower()
     w = [x.lower().strip("'’") for x in words(text)]
     if re.search(r"\b(you|your|you're|youre|yourself)\b", low):

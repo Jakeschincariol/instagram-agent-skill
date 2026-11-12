@@ -26,8 +26,14 @@ import json
 import re
 import sys
 
-WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
-SENT_RE = re.compile(r"[^.!?]+[.!?]*")
+try:
+    import kolang
+    KO = True
+except ImportError:                      # beats.py copied out on its own
+    KO = False
+
+WORD_RE = re.compile(r"[A-Za-z0-9가-힣$%'’-]+")
+SENT_RE = re.compile(r"[^.!?。]+[.!?。]*")
 CONCRETE_RE = re.compile(r"\$\s?\d|\b\d[\d,.]*\b|(?<!^)\b[A-Z][a-z]{2,}\b", re.MULTILINE)
 STOPWORDS = {
     "the", "a", "an", "and", "or", "but", "if", "of", "to", "in", "on", "for",
@@ -47,6 +53,43 @@ def words(text):
     return WORD_RE.findall(re.sub(r"(?<=\d),(?=\d)", "", text))
 
 
+def korean(text):
+    return KO and kolang.is_korean(text)
+
+
+def speak_secs(text, wps):
+    """
+    How long this line takes to say. Korean is counted in syllables at a rate
+    scaled off --wpm, because counting Korean in whitespace-separated words
+    undercounts it by roughly four times.
+    """
+    if korean(text):
+        return kolang.duration(text,
+                               syl_per_sec=kolang.KO_SYL_PER_SEC * (wps / 2.75),
+                               en_words_per_sec=wps)
+    return len(words(text)) / wps
+
+
+def spoken_units(text, wps, seconds):
+    """What to tell the user to cut or add: words in English, syllables in Korean."""
+    if korean(text):
+        return f"{int(seconds * kolang.KO_SYL_PER_SEC * (wps / 2.75))}음절"
+    return f"{int(seconds * wps)} words"
+
+
+def concrete_count(text):
+    if korean(text):
+        return len(kolang.numbers(text))
+    return len(CONCRETE_RE.findall(text))
+
+
+def keywords(text):
+    """Content words, for checking whether the last beat loops the hook."""
+    if korean(text):
+        return kolang.stems(text)
+    return {w.lower() for w in words(text) if w.lower() not in STOPWORDS}
+
+
 def pretty(token):
     """Put the thousands separator back for display."""
     return re.sub(r"(\d)(?=(\d{3})+$)", r"\1,", token)
@@ -63,7 +106,7 @@ def split_beats(raw, wps):
     for line in [l.strip() for l in raw.splitlines()]:
         if not line:
             continue
-        if len(words(line)) / wps <= MAX_BEAT * 1.5:
+        if speak_secs(line, wps) <= MAX_BEAT * 1.5:
             beats.append(line)
             continue
         # Long paragraph: break it at sentence ends so the timings mean
@@ -72,7 +115,7 @@ def split_beats(raw, wps):
         buf = ""
         for part in parts:
             candidate = (buf + " " + part).strip()
-            if buf and len(words(candidate)) / wps > MAX_BEAT:
+            if buf and speak_secs(candidate, wps) > MAX_BEAT:
                 beats.append(buf)
                 buf = part
             else:
@@ -91,14 +134,15 @@ def analyse(raw, wpm=165, target=None):
     rows, clock = [], 0.0
     for i, text in enumerate(beats):
         n = len(words(text))
-        dur = n / wps
+        dur = speak_secs(text, wps)
         rows.append({
             "n": i + 1,
             "start": round(clock, 2),
             "dur": round(dur, 2),
             "words": n,
+            "syllables": kolang.syllables(text) if KO else 0,
             "text": text,
-            "concrete": len(CONCRETE_RE.findall(text)),
+            "concrete": concrete_count(text),
             "label": "",
             "flags": [],
         })
@@ -119,8 +163,8 @@ def analyse(raw, wpm=165, target=None):
     if rows[0]["dur"] > HOOK_WINDOW:
         rows[0]["flags"].append(f"hook runs {rows[0]['dur']:.1f}s, past the {HOOK_WINDOW:.0f}s mark")
         notes.append(f"Beat 1 takes {rows[0]['dur']:.1f}s to say. Cut it to "
-                     f"{int(HOOK_WINDOW * wps)} words or fewer, or the hook lands after "
-                     "the decision has been made.")
+                     f"{spoken_units(rows[0]['text'], wps, HOOK_WINDOW)} or fewer, or the "
+                     "hook lands after the decision has been made.")
     if rows[0]["concrete"] == 0:
         notes.append("Beat 1 has no number and no name in it. Hooks without something "
                      "checkable are the ones that get scrolled.")
@@ -146,8 +190,8 @@ def analyse(raw, wpm=165, target=None):
             run, start = 0, None
 
     # Does the last line hand you back to the first one?
-    first = {w.lower() for w in words(rows[0]["text"]) if w.lower() not in STOPWORDS}
-    last = {w.lower() for w in words(rows[-1]["text"]) if w.lower() not in STOPWORDS}
+    first = keywords(rows[0]["text"])
+    last = keywords(rows[-1]["text"])
     loop = sorted(pretty(w) for w in first & last)
     if loop:
         notes.append(f"Loops: the last beat repeats \"{', '.join(loop[:3])}\" from the hook. "
@@ -161,23 +205,33 @@ def analyse(raw, wpm=165, target=None):
         if abs(delta) <= target * 0.1:
             notes.append(f"Length is on target ({total:.1f}s against {target}s).")
         elif delta > 0:
-            notes.append(f"{delta:.1f}s over target. Cut about {int(delta * wps)} words.")
+            notes.append(f"{delta:.1f}s over target. Cut about "
+                         f"{spoken_units(raw, wps, delta)}.")
         else:
-            notes.append(f"{-delta:.1f}s under target. Either add {int(-delta * wps)} words "
-                         "or shoot it short. Short is usually right.")
+            notes.append(f"{-delta:.1f}s under target. Either add "
+                         f"{spoken_units(raw, wps, -delta)} or shoot it short. "
+                         "Short is usually right.")
 
     return {
         "wpm": wpm, "target": target,
+        "korean": korean(raw),
         "total_seconds": round(total, 2),
         "total_words": sum(r["words"] for r in rows),
+        "total_syllables": sum(r["syllables"] for r in rows),
         "beats": rows,
         "notes": notes,
     }
 
 
 def render(a, out=sys.stdout):
-    head = (f"BEAT SHEET  ·  {a['total_words']} words  ·  ~{a['total_seconds']:.1f}s "
-            f"at {a['wpm']} wpm" + (f"  ·  target {a['target']}s" if a["target"] else ""))
+    if a.get("korean"):
+        size = f"{a['total_words']}어절 {a['total_syllables']}음절"
+        rate = f"at {a['wpm']} wpm 환산"
+    else:
+        size = f"{a['total_words']} words"
+        rate = f"at {a['wpm']} wpm"
+    head = (f"BEAT SHEET  ·  {size}  ·  ~{a['total_seconds']:.1f}s "
+            f"{rate}" + (f"  ·  target {a['target']}s" if a["target"] else ""))
     print("\n" + head, file=out)
     print("=" * max(len(head), 72), file=out)
     for r in a["beats"]:
