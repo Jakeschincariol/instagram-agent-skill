@@ -1,7 +1,7 @@
 ---
 name: ig-reel
 description: >-
-  Write an Instagram Reel from a raw idea - hook options off 26 formulas, the
+  Write an Instagram Reel from a raw idea - hook options off 27 formulas, the
   spoken script, the on-screen text, and a timed beat sheet - in the user's own
   voice and scored before they shoot it. Use whenever the user wants a Reel, a
   short-form video script, a hook, a voiceover, "make a reel about X", "what
@@ -29,7 +29,7 @@ python3 beats.py script.txt --target 30     # timed beat sheet before you shoot
    to. If it does not exist, ask for **three of their own reels**, transcribe or
    read them, infer the voice, and write the file. A script in the wrong voice
    is unusable, because they have to say it out loud.
-2. Read `hooks.json` in this folder. 26 formulas, each with a template, a filled
+2. Read `hooks.json` in this folder. 27 formulas, each with a template, a filled
    example, the on-screen version, what it is for, and how it gets ruined.
    Four of them are in there because they kept turning up in real hooks, not
    because they completed a pattern.

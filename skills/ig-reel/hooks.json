@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "note": "26 hook formulas for Reels. A Reel has two hooks that fire at the same time and they are not the same sentence: the first thing you say, and the first thing on screen. The spoken hook has about two seconds. The on-screen hook has about one, because it is read before it is heard. Every formula here carries a template, a filled example, the on-screen version, what it is for, and the way it usually gets ruined. Each formula also carries a `match` regex, so the same vocabulary can name a hook found in the wild and not only write a new one. Walk them in `classify_order`, which is most specific first, case-insensitive.",
+  "note": "27 hook formulas for Reels. A Reel has two hooks that fire at the same time and they are not the same sentence: the first thing you say, and the first thing on screen. The spoken hook has about two seconds. The on-screen hook has about one, because it is read before it is heard. Every formula here carries a template, a filled example, the on-screen version, what it is for, and the way it usually gets ruined. Each formula also carries a `match` regex, so the same vocabulary can name a hook found in the wild and not only write a new one. Walk them in `classify_order`, which is most specific first, case-insensitive.",
   "rules": [
     "Write the spoken line and the on-screen line separately. On screen is the shorter, blunter one, six words or fewer, no punctuation it does not need.",
     "No setup. The video starts at the sentence you would normally reach at second six.",
@@ -269,6 +269,16 @@
       "best_for": "One-claim videos with no story attached. It is the most common shape in the wild and the easiest to write badly.",
       "trap": "A superlative with a soft answer. If the second half is 'consistency', you have said nothing and the comments will tell you.",
       "match": "^\\s*(?:the\\s+)?(?:fastest|quickest|best|worst|biggest|greatest|easiest|hardest|only|number one|#1|most important)\\s+\\w+|\\bthe (?:fastest|best|worst|biggest|greatest|only) way to\\b"
+    },
+    {
+      "id": 27,
+      "name": "Second-Person Diagnosis",
+      "template": "Your {thing they own} is {bad state} {right now / and you do not know it}.",
+      "example": "Your app can cost you $100K before its first sale.",
+      "on_screen": "YOUR APP IS LEAKING",
+      "best_for": "Cold reach. It conscripts the viewer before they have decided whether they care about the topic, because the subject of the sentence is something they own.",
+      "trap": "Diagnosing something the viewer does not own. 'Your enterprise data lake' dies on a feed of hobbyists. Also: no consequence. 'Your prompts are long' is an observation, not a diagnosis.",
+      "match": "^(?:your|you(?:'re|’re| are)?)\\b[^.!?]{0,60}\\b(?:is|are|can|will|have|hit|cost|costing|pay|paying|leak|leaking|break|breaking|lose|losing|run|running|need|needs|does not need|doesn'?t need)\\b"
     }
   ],
   "classify_order": [
@@ -297,6 +307,7 @@
     21,
     22,
     11,
-    14
+    14,
+    27
   ]
 }
