@@ -78,7 +78,7 @@
       "on_screen": "YOUR CAPTIONS ARE CUT",
       "best_for": "Teaching. The 'not your fault' half stops it reading as an insult, which is what kills this one.",
       "trap": "Skipping the absolution. 'You are doing it wrong' on its own makes people leave rather than learn.",
-      "match": "\\b(?:big(?:gest)?|common|the) mistake\\b|\\bmistake (?:that|people|i)\\b|\\byou'?(?:re| are) doing\\b[^.!?]*\\bwrong\\b|\\bdoing (?:it|this) wrong\\b"
+      "match": "\\b(?:big(?:gest)?|common|the) mistake\\b|\\bmistake (?:that|people|i)\\b|\\byou'?(?:re| are) \\w+ing\\b[^.!?]*\\bwrong\\b|\\bdoing (?:it|this) wrong\\b"
     },
     {
       "id": 8,
