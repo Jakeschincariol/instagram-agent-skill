@@ -102,14 +102,23 @@ python3 -m yt_dlp --skip-download --write-auto-subs --sub-langs "en.*" \
 Take every caption word with a timestamp under 3.0 seconds. That is the hook,
 as said, not as written.
 
+These two commands need `yt-dlp`, the one optional dependency in the pack. It
+is not installed by default; if `python3 -m yt_dlp` says "No module named
+yt_dlp", install it with `pip install yt-dlp`, or skip this step and use what
+you captured by hand. `swipe.py` itself needs nothing beyond Python 3.
+
 ## Step 3: rank it
 
 Fill a tab-separated file with a header row and run the script:
 
 ```
-account	followers	median	views	hook
-@someone	48000	11000	412000	nobody tells you your first 30 reels are supposed to flop
+account	followers	median	views	hook	on-screen	length	cta
+@someone	48000	11000	412000	nobody tells you your first 30 reels are supposed to flop	FIRST 30 FLOP	24	comment FLOP
 ```
+
+`views` and `hook` are required. `on-screen`, `length` (seconds) and `cta` are
+optional; when they are there, the script compares them between the top and
+bottom thirds (median length, which asks, how many had a text card).
 
 ```bash
 python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
@@ -117,7 +126,10 @@ python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
 
 It computes the outlier multiple, names the hook formula using the same 26
 formulas `/ig-reel` writes from, scores each hook with `hookscore.py`, and
-prints what separates the top third from the bottom third.
+prints what separates the top third from the bottom third: hook score, hook
+length, and, from the optional columns, reel length, the ask and the on-screen
+card. Whether the payoff is visual and whether the first frame moves are not in
+the file; read those off the reels yourself.
 
 ## Step 4: say what it means, carefully
 

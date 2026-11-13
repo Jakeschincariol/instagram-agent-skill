@@ -28,6 +28,12 @@ Usage
   python3 hookscore.py --hook "I lost $18,000 on one missing contract."
   pbpaste | python3 hookscore.py -
   python3 hookscore.py hooks.txt --json
+
+Exit status
+  0  the best hook scored 70 or more
+  1  the best hook scored under 70. This is a verdict, not an error: the
+     ranking was printed and is valid, there is just no strong hook in it
+  2  nothing to score (empty input)
 """
 
 import argparse
@@ -269,7 +275,11 @@ def render_table(rows, out=sys.stdout):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Score a Reel hook on five properties.")
+    ap = argparse.ArgumentParser(
+        description="Score a Reel hook on five properties.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="exit status: 0 = best hook scored 70+, 1 = best hook under 70 (a verdict,\n"
+               "not an error - the output is valid), 2 = nothing to score.")
     ap.add_argument("input", nargs="?", default="-", help="file with one hook per line, or -")
     ap.add_argument("--hook", help="score a single hook given on the command line")
     ap.add_argument("--json", action="store_true")

@@ -945,8 +945,8 @@
     },
     {
       "id": "the-result",
-      "regex": "(?i)^\\s*(?:the result|the best part|the kicker|the catch)\\?\\s*$",
-      "name": "One-word rhetorical question line",
+      "regex": "(?i)(?:^|(?<=[.!?] ))\\s*(?:the result|the best part|the kicker|the catch)\\?(?=\\s|$)",
+      "name": "Staged rhetorical question (\"The result?\")",
       "fix": "Answer it inline instead of staging a reveal."
     },
     {
@@ -957,7 +957,7 @@
     },
     {
       "id": "triad",
-      "regex": "(?i)\\b\\w+, \\w+, and \\w+\\.",
+      "regex": "(?i:\\b\\w+, \\w+, and \\w+\\.)|^[ \\t]*[A-Z][a-z]+\\. [A-Z][a-z]+\\. [A-Z][a-z]+\\.[ \\t]*$",
       "name": "Rule-of-three triad",
       "fix": "Two items or four. Three is the model's default rhythm."
     },
@@ -969,9 +969,9 @@
     },
     {
       "id": "hashtag-wall",
-      "regex": "(?:#\\w+[ \\t]*){5,}",
-      "name": "Hashtag wall (5+)",
-      "fix": "Three hashtags. LinkedIn stopped rewarding the wall."
+      "regex": "(?:#\\w+[ \\t]*){6,}",
+      "name": "Hashtag wall (6+)",
+      "fix": "Instagram caps a post at five hashtags. Keep three to five specific topic tags, on their own line at the bottom."
     },
     {
       "id": "as-an-ai",

@@ -22,6 +22,9 @@ python3 hookscore.py --hook "one line"      # score a single one
 python3 beats.py script.txt --target 30     # timed beat sheet before you shoot
 ```
 
+`hookscore.py` exits 1 when the best hook is under 70. That is the verdict,
+not a crash: the ranking it printed is valid.
+
 ## Before you write
 
 1. Read `~/.claude/instagram/voice.md` if it exists. That is the user's voice
@@ -135,13 +138,18 @@ Write it separately, every time. It is read before it is heard.
 
 ```
 HOOKS  (scored)
-  86  STRONG  #5  Time Collapse   "Proposals used to take me five hours. Twenty minutes now."
+  79  STRONG  #5  Time Collapse   "Proposals used to cost me five hours. Now it's twenty minutes."
                                   on screen: 5 HOURS -> 20 MIN
-  71  STRONG  #1  Cost Confession "I billed four hours a week for formatting. For two years."
+  55  OK      #1  Cost Confession "I billed four hours a week for formatting. For two years."
                                   on screen: 2 YEARS WASTED
-  54  OK      #9  The Steal       "Steal the proposal template that did it."
+  37  WEAK    #9  The Steal       "Steal the proposal template that did it."
                                   on screen: STEAL THIS
 
 Shooting #5: the ratio is believable, it reads in one glance on screen,
-and the number is yours.
+and the number is yours. The first draft, "Proposals used to take me five
+hours. Twenty minutes now.", scored 51: nothing in it was at stake. "Cost"
+fixed that. #9 has no number and no name in it, so it is a closing line,
+not a hook.
 ```
+
+These are real `hookscore.py` scores. Re-run them if you change the scorer.
