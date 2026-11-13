@@ -23,8 +23,28 @@ Usage
 
 import argparse
 import json
+import os
 import re
 import sys
+
+# One list of spoken numbers for the whole folder: hookscore.py owns it. Do not
+# leave a __pycache__ behind in the skill folder just for importing it.
+sys.dont_write_bytecode = True
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from hookscore import MONEY_WORDS, SPOKEN_NUMBERS  # noqa: E402
+except ImportError:
+    # beats.py copied on its own. Same lists as hookscore.py; keep them in sync.
+    SPOKEN_NUMBERS = {
+        "zero", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+        "ten", "eleven", "twelve", "fifteen", "twenty", "thirty", "forty", "fifty",
+        "sixty", "seventy", "eighty", "ninety", "hundred", "thousand", "million",
+        "billion", "dozen", "half", "twice", "triple",
+    }
+    MONEY_WORDS = {
+        "dollars", "dollar", "bucks", "grand", "percent", "cents",
+        "millionaire", "billionaire", "revenue", "profit", "salary", "rent",
+    }
 
 WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
 SENT_RE = re.compile(r"[^.!?]+[.!?]*")
@@ -35,6 +55,15 @@ STOPWORDS = {
     "you", "your", "i", "my", "me", "we", "our", "they", "them", "he", "she",
     "so", "just", "not", "no", "do", "did", "does", "have", "has", "had",
     "will", "can", "at", "as", "by", "from", "out", "up", "off", "one", "all",
+    # Filler that turns up in any two lines of speech. Sharing one of these is
+    # not a loop: "about" in the hook and "think about it" at the end is not a
+    # callback. Words that carry the idea (numbers, names, stakes) stay out.
+    "about", "really", "very", "thing", "things", "something", "anything",
+    "what", "how", "why", "when", "where", "who", "which", "there", "here",
+    "then", "than", "into", "onto", "over", "more", "most", "some", "any",
+    "get", "got", "going", "go", "make", "made", "like", "even", "also",
+    "because", "would", "could", "should", "its", "it's", "i'm", "i'll",
+    "i've", "that's", "these", "those", "think", "know", "want", "say", "said",
 }
 
 HOOK_WINDOW = 3.0        # seconds. Past this, the thumb has already decided.
@@ -98,7 +127,9 @@ def analyse(raw, wpm=165, target=None):
             "dur": round(dur, 2),
             "words": n,
             "text": text,
-            "concrete": len(CONCRETE_RE.findall(text)),
+            # "five hours" is as concrete as "5 hours" once it is said out loud.
+            "concrete": len(CONCRETE_RE.findall(text)) + sum(
+                1 for w in words(text) if w.lower() in SPOKEN_NUMBERS or w.lower() in MONEY_WORDS),
             "label": "",
             "flags": [],
         })

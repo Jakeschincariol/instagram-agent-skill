@@ -7,7 +7,9 @@ Instagram gives a caption about 125 characters in the feed and hides the rest
 behind a tap. Almost every caption that fails, fails there: the hook is in
 sentence three, or the first line is a greeting, or the whole thing opens on a
 hashtag. This prints the visible window as a box so you can read it the way a
-scrolling stranger does, then checks the eight things that are worth checking.
+scrolling stranger does, then runs the checks worth running: length, the first
+line (greeting, emoji, hashtag, cut), a concrete hook, hashtags and where they
+sit, links, one ask, a typeable keyword, emoji density and search terms.
 
 The 125-character cut is an approximation. The real number moves with the
 device, the font size and where your line breaks fall, which is exactly why
@@ -40,10 +42,34 @@ MENTION_RE = re.compile(r"(?:^|\s)(@[A-Za-z0-9_.]+)")
 LINK_RE = re.compile(r"https?://\S+|\bwww\.\S+|\b[a-z0-9-]+\.(?:com|co|io|net|org|ai|app)/\S*",
                      re.IGNORECASE)
 EMOJI_RE = re.compile(r"[\U0001F300-\U0001FAFF☀-➿←-⇿️]")
-CONCRETE_RE = re.compile(r"\$\s?\d|\b\d[\d,.]*\b|(?<!^)\b[A-Z][a-z]{2,}\b", re.MULTILINE)
+# A capitalised word counts as a name only mid-sentence. The first word of a
+# line or of a sentence ("Hey guys! Quick one") is capitalised by grammar, not
+# because it names anything.
+CONCRETE_RE = re.compile(r"\$\s?\d|\b\d[\d,.]*\b|(?<!^)(?<![.!?]\s)\b[A-Z][a-z]{2,}\b",
+                         re.MULTILINE)
+
+# The keyword has to be one word in capitals that people can type: COMMENT
+# CONTRACT works, comment "the contract guide" does not. Only "comment" and
+# "the word" are case-insensitive; the keyword itself is not.
+KEYWORD_ASK = re.compile(r"(?i:\bcomment\s+(?:the\s+word\s+)?)[\"“']?[A-Z][A-Z0-9]+\b(?![a-z])")
+# Something that looks like a keyword ask but is not typeable: a quoted phrase,
+# a lower-case word, or an emoji where the keyword should be.
+LOOSE_KEYWORD_ASK = re.compile(
+    r"(?i:\bcomment\s+(?:the\s+word\s+)?)"
+    r"(?:[\"“'][^\"”'\n]+[\"”']"
+    r"|(?!(?:below|here|your|my|it|this|that|with|if|on|and|or|what|which|the|a|an|down|"
+    r"for|to|in|now|too|back|please)\b)[a-z][a-z0-9]*\b"
+    r"|[^\w\s\"“'])")
+# A greeting word has to stand alone: followed by a space, punctuation or the
+# end of the line, never a hyphen or another letter. "Hi-res", "Hiring",
+# "Yours" and "Superfans" are not greetings. Bare "welcome" is left out too:
+# "Welcome to the only template you need" is a hook, "Welcome back" is not.
+GREETING_RE = re.compile(
+    r"(?i)^\s*(?:hey|hi|hello|hiya|howdy|yo|sup|gm|good (?:morning|afternoon|evening|day)"
+    r"|what'?s up|welcome back|happy (?:\w+day|friday|weekend))(?![\w'’-])")
 
 ASKS = [
-    (re.compile(r"(?i)\bcomment (?:the word |\")?[A-Z0-9]{2,}\b"), "comment a keyword"),
+    (KEYWORD_ASK, "comment a keyword"),
     (re.compile(r"(?i)\b(?:dm|message) me\b"), "DM me"),
     (re.compile(r"(?i)\bsave (?:this|it)\b"), "save this"),
     (re.compile(r"(?i)\bshare (?:this|it)\b"), "share this"),
@@ -89,6 +115,10 @@ def analyse(text, cut=TRUNCATE, keywords=None):
     window = visible_window(stripped, cut)
     truncated = chars > cut
     asks = [name for pattern, name in ASKS if pattern.search(stripped)]
+    keyword = KEYWORD_ASK.search(stripped)
+    loose = None if keyword else LOOSE_KEYWORD_ASK.search(stripped)
+    if loose:
+        asks.append("comment a phrase")     # still an ask, just not a typeable one
     filler = [t for t in tags if t.lower() in FILLER_TAGS]
     keywords = [k.strip() for k in (keywords or []) if k.strip()]
 
@@ -106,6 +136,12 @@ def analyse(text, cut=TRUNCATE, keywords=None):
     elif first_line.startswith("#") or first_line.startswith("@"):
         add("FIRST LINE", "FAIL",
             "opens on a hashtag or a mention, which is the one position worth a sentence")
+    elif EMOJI_RE.match(first_line):
+        add("FIRST LINE", "FAIL",
+            "opens on an emoji. The first character is worth a word")
+    elif GREETING_RE.match(first_line):
+        add("FIRST LINE", "FAIL",
+            "opens on a greeting. Nobody came to the feed to be greeted; lead with the hook or the ask")
     elif len(first_line) > cut:
         add("FIRST LINE", "WARN",
             f"{len(first_line)} characters, so it gets cut at {cut} mid-thought. "
@@ -148,6 +184,13 @@ def analyse(text, cut=TRUNCATE, keywords=None):
     else:
         add("ONE ASK", "WARN", f"{len(asks)} asks ({', '.join(asks)}). "
                                "Two asks is the same as none")
+
+    if keyword:
+        add("KEYWORD ASK", "PASS", f"{keyword.group(0).split()[-1].strip(chr(34) + chr(39) + '“')} "
+                                   "is one word in capitals, easy to type")
+    elif loose:
+        add("KEYWORD ASK", "WARN", f"{loose.group(0)} - not a keyword people can type. "
+                                   "Use one word in capitals, no spaces, no emoji: Comment CONTRACT")
 
     density = len(emoji) * 100 / max(chars, 1)
     add("EMOJI", "WARN" if density > 4 else "PASS",

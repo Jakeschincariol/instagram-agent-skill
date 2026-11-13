@@ -174,9 +174,14 @@ python3 detect.py before.txt after.txt       # prove the delta
 
 **What gets flagged instead of fixed:** "It's not just X, it's Y", rule-of-three
 triads, the video preamble, emoji bullet lists, three shouted words in a row,
-hashtag walls, reflex follow bait, uniform sentence length. Changing the shape
-of a sentence needs judgement, so those come back for a rewrite rather than
-getting mangled by a regex.
+hashtag walls (six or more, since five is the cap), reflex follow bait, uniform
+sentence length. Changing the shape of a sentence needs judgement, so those come
+back for a rewrite rather than getting mangled by a regex.
+
+Short drafts (comments, DMs, replies, a bio) are scored on the checks they are
+long enough for. Sentence variation needs four sentences and the concreteness
+density needs 25 words; under that, those checks show `n/a` instead of a flat
+50 that used to make a PASS impossible for anything shorter than a paragraph.
 
 Run against a caption written to be as bad as possible:
 
@@ -201,6 +206,10 @@ After `humanize.py`, with the flagged structures still unrewritten:
 ```bash
 python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
 ```
+
+`swipe.py` needs nothing but Python. The optional YouTube Shorts step in
+`/ig-viral` uses `yt-dlp`, which is not installed by default:
+`pip install yt-dlp`. It is the only optional dependency in the pack.
 
 Raw views are not evidence. A 2,000,000-follower account doing 400,000 views
 had a quiet Tuesday. A 4,000-follower account doing 400,000 views found
@@ -260,7 +269,8 @@ that have no hook formula at all.
 
 One fixed bug worth naming: `SPECIFICITY` only counted digits, so "zero
 dollars" and "three marketing books" scored as having nothing concrete in them.
-Spoken hooks say their numbers out loud.
+Spoken hooks say their numbers out loud. The same fix now applies in
+`detect.py` and `beats.py`, which had the digits-only version too.
 
 If you re-run this on a bigger or cleaner corpus and get a different answer, I
 would rather know. The measurement script is not in the repo because it depends

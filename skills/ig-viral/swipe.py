@@ -63,6 +63,17 @@ def classify(hook, formulas):
     return None, "unclassified"
 
 
+def parse_seconds(value):
+    """'24', '24s', '0:24', '1:05', '1:02:03' -> seconds. None if unreadable."""
+    m = re.search(r"\d+(?::\d{1,2}){0,2}(?:\.\d+)?", value or "")
+    if not m:
+        return None
+    total = 0.0
+    for part in m.group(0).split(":"):      # each colon shifts the rest by 60
+        total = total * 60 + float(part)
+    return total
+
+
 def read_rows(path):
     raw = sys.stdin.read() if path == "-" else open(path, encoding="utf-8").read()
     lines = [l for l in raw.splitlines() if l.strip() and not l.lstrip().startswith("#")]
@@ -86,6 +97,10 @@ def read_rows(path):
         for k in ("followers", "median"):
             digits = re.sub(r"[^\d]", "", r.get(k, "") or "")
             r[k] = int(digits) if digits else None
+        # Optional columns the skill asks you to capture. Absent or blank is fine.
+        r["length_s"] = parse_seconds(r.get("length", ""))
+        r["cta"] = (r.get("cta") or "").strip()
+        r["on_screen"] = (r.get("on-screen") or r.get("onscreen") or r.get("on_screen") or "").strip()
         if r["views"] and r.get("hook"):
             rows.append(r)
     return rows
@@ -115,6 +130,22 @@ def analyse(rows, formulas):
     counts = {}
     for r in top:
         counts[r["formula"]] = counts.get(r["formula"], 0) + 1
+
+    def cta_kind(cta):
+        low = cta.lower()
+        if not low:
+            return None
+        return "comment a keyword" if low.startswith("comment") else low.split()[0]
+
+    def tally(items):
+        c = {}
+        for i in items:
+            k = cta_kind(i["cta"])
+            if k:
+                c[k] = c.get(k, 0) + 1
+        return sorted(c.items(), key=lambda kv: -kv[1])
+
+    has_onscreen = "on-screen" in rows[0] or "onscreen" in rows[0] or "on_screen" in rows[0]
     return {
         "baseline": "account median" if used_median else "follower count",
         "n": len(ranked),
@@ -126,6 +157,13 @@ def analyse(rows, formulas):
         "top_words": med(top, "words"),
         "bottom_words": med(bottom, "words"),
         "unclassified": sum(1 for r in ranked if r["formula"] == "unclassified"),
+        # Structure, from the optional columns: None / [] when not captured.
+        "top_length": med(top, "length_s"),
+        "bottom_length": med(bottom, "length_s"),
+        "top_ctas": tally(top),
+        "bottom_ctas": tally(bottom),
+        "top_onscreen": (sum(1 for r in top if r["on_screen"]), len(top)) if has_onscreen else None,
+        "bottom_onscreen": (sum(1 for r in bottom if r["on_screen"]), len(bottom)) if has_onscreen else None,
     }
 
 
@@ -151,6 +189,16 @@ def render(a, out=sys.stdout):
               f"vs bottom {a['bottom_hook_score']:.0f}", file=out)
     print(f"  median hook length:    top {a['top_words']} words  "
           f"vs bottom {a['bottom_words']} words", file=out)
+    if a["top_length"] is not None and a["bottom_length"] is not None:
+        print(f"  median length:         top {a['top_length']:g}s  "
+              f"vs bottom {a['bottom_length']:g}s", file=out)
+    if a["top_ctas"] or a["bottom_ctas"]:
+        fmt = lambda c: ", ".join(f"{k} x{n}" for k, n in c) or "none captured"
+        print(f"  cta, top third:        {fmt(a['top_ctas'])}", file=out)
+        print(f"  cta, bottom third:     {fmt(a['bottom_ctas'])}", file=out)
+    if a["top_onscreen"]:
+        (tn, tt), (bn, bt) = a["top_onscreen"], a["bottom_onscreen"]
+        print(f"  on-screen card:        top {tn}/{tt}  vs bottom {bn}/{bt}", file=out)
     print(f"  unclassified:          {a['unclassified']} of {a['n']}. Read those by hand, "
           "they are where a formula you do not have yet is hiding.", file=out)
     print("\n  A hand-collected batch is evidence, not proof. Twelve reels shows you "
@@ -167,7 +215,11 @@ def to_markdown(a):
         lines += [f"## {mult}  {r['formula']}  ({r.get('account', '')})",
                   f"- views: {r['views']:,}  baseline: {r['baseline']:,}",
                   f"- hook score: {r['hook_score']}  words: {r['words']}",
-                  f"- hook: \"{r['hook']}\"", ""]
+                  f"- hook: \"{r['hook']}\""]
+        extra = [f"- on-screen: {r['on_screen']}" if r["on_screen"] else "",
+                 f"- length: {r['length_s']:g}s" if r["length_s"] is not None else "",
+                 f"- cta: {r['cta']}" if r["cta"] else ""]
+        lines += [e for e in extra if e] + [""]
     return "\n".join(lines) + "\n"
 
 
@@ -197,7 +249,8 @@ def main():
         render(a)
     if args.out:
         path = os.path.expanduser(args.out)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        if os.path.dirname(path):            # "swipe.md" has no directory part
+            os.makedirs(os.path.dirname(path), exist_ok=True)
         open(path, "w", encoding="utf-8").write(to_markdown(a))
         print(f"wrote {path}", file=sys.stderr)
 

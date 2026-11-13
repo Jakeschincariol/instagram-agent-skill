@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 LEX = os.path.join(HERE, "slop.json")
 
 URL_RE = re.compile(r"https?://\S+|www\.\S+|\S+@\S+\.\S+")
-SENT_RE = re.compile(r"[^.!?\n]+[.!?]*")
+SENT_RE = re.compile(r"(?:[^.!?\n]|(?<=\d)\.(?=\d))+[.!?]*")   # same as detect.py
 
 
 def load_lexicon(path=LEX):
@@ -126,20 +126,52 @@ def _match_case(src, repl):
     return repl
 
 
+def phrase_pattern(find):
+    """Lexicon entry -> regex. Commas between words are optional, so
+    "run don't walk" also catches "Run, don't walk,". Same as detect.py."""
+    body = r",?\s+".join(re.escape(part) for part in find.split())
+    return re.compile(r"\b" + body + r"\b", re.IGNORECASE)
+
+
+# A conjunction left with nothing to join after a deletion. A \x00 before the
+# space is the end of a protected sentence (see KEEP_RE), so it counts as a
+# sentence boundary too.
+DANGLING_SENTENCE = re.compile(
+    r"(?im)(^|[.!?][ \t]+|\x00[ \t]+)[ \t]*(?:and|or|but|plus)[ \t]*[.!?]+[ \t]*")
+DANGLING_TAIL = re.compile(r"(?i)[,;]?[ \t]+(?:and|or|but|plus)[ \t]*([.!?])")
+# The same shapes written on purpose: "And?" on its own line, "But." as a beat,
+# "Cats, or?". They are masked before any deletion and put back afterwards, so
+# the cleanup above only ever removes a conjunction a deletion orphaned.
+KEEP_RE = re.compile(
+    r"(?im)(?:(?:^|(?<=[.!?] )|(?<=[.!?]\t))[ \t]*|[,;]?[ \t]+)(?:and|or|but|plus)[ \t]*[.!?]+")
+HAS_TEXT = re.compile(r"[A-Za-z0-9#@\x00]")         # \x00: a line holding a protected sentence
+
+
 def pass_lexical(text, lex):
     """Replace slop words and phrases. Longest first so phrases win."""
     hits = []
+    kept = []
+
+    def keep(m):
+        # The placeholder keeps the sentence's final mark, so the clean-up
+        # below still sees "and." + "." as doubled punctuation.
+        kept.append(m.group(0))
+        return f"\x00KEEP{len(kept) - 1}\x00{m.group(0)[-1]}"
+
+    text = KEEP_RE.sub(keep, text)
+    original_lines = {l.strip() for l in text.splitlines()}
+    deleted = False
     entries = sorted(lex["phrases"] + lex["words"],
                      key=lambda e: len(e["find"]), reverse=True)
     for entry in entries:
         find = entry["find"]
-        pattern = re.compile(r"\b" + re.escape(find).replace(r"\ ", r"\s+") + r"\b",
-                             re.IGNORECASE)
+        pattern = phrase_pattern(find)
         found = pattern.findall(text)
         if not found:
             continue
         hits.append({"find": find, "replace": entry["replace"] or "(deleted)",
                      "count": len(found), "family": entry["family"]})
+        deleted = deleted or not entry["replace"]
         text = pattern.sub(lambda m: _match_case(m.group(0), entry["replace"]), text)
     # Clean up after deletions. Deleting a whole clause leaves orphaned
     # punctuation behind ("system. ." or a line that now opens on a comma),
@@ -161,6 +193,21 @@ def pass_lexical(text, lex):
     # a splice ("is important, also, it's proof"). Promote it to a full stop.
     text = re.sub(r",\s*(also|so|still|basically|in the end)\s*,\s*",
                   lambda m: ". " + m.group(1)[0].upper() + m.group(1)[1:] + ", ", text)
+    if deleted:
+        # Deleting "follow for more" out of "Follow for more and tag someone
+        # who needs this!" used to leave "And!". Only runs when something was
+        # actually deleted, so a writer's own "and" is never touched.
+        text = DANGLING_SENTENCE.sub(lambda m: m.group(1), text)   # "And!" -> ""
+        text = DANGLING_TAIL.sub(r"\1", text)                      # "this, and." -> "this."
+        # A line that had words and now has only an emoji or punctuation left
+        # ("Tag someone who needs this 👇" -> "👇") goes too. A line that was
+        # emoji-only in the original is the writer's and stays.
+        text = "\n".join(l for l in text.split("\n")
+                         if HAS_TEXT.search(l) or not l.strip() or l.strip() in original_lines)
+        text = re.sub(r"(?m)^[ \t]+(?=\S)", "", text)
+        text = re.sub(r"\n{3,}", "\n\n", text)
+    for i, original in enumerate(kept):
+        text = re.sub(re.escape(f"\x00KEEP{i}\x00") + r"[.!?]?", lambda m: original, text)
     return text, hits
 
 
@@ -175,7 +222,8 @@ def scan_structures(text, lex):
         if found:
             flags.append({"name": s["name"], "count": len(found), "fix": s["fix"]})
     # Sentence-length uniformity is structural too.
-    lens = [len(s.split()) for s in SENT_RE.findall(text) if len(s.split()) > 2]
+    # Every sentence counts, short ones included - same rule as detect.py BURSTINESS.
+    lens = [len(s.split()) for s in SENT_RE.findall(text) if s.split()]
     if len(lens) >= 4:
         mean = sum(lens) / len(lens)
         var = sum((n - mean) ** 2 for n in lens) / len(lens)

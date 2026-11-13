@@ -62,12 +62,13 @@ Structural tells get **flagged, not rewritten**, because changing the shape of
 a sentence needs judgement:
 
 - "It's not just X, it's Y" and "not only X but also Y"
-- Rule-of-three triads
-- Rhetorical one-word question lines: "The result?"
+- Rule-of-three triads, "fast, cheap, and easy." and a line of three
+  fragments, "Clarity. Speed. Confidence."
+- Staged rhetorical questions: "The result?", on its own line or mid-paragraph
 - The video preamble: "in this video I'm going to show you"
 - Emoji bullet lists
 - Three or more shouted words in a row
-- Hashtag walls
+- Hashtag walls: six or more. Five is Instagram's cap, so five is allowed
 - Reflex bait: "follow for more", "tag someone who", "double tap if"
 
 That list is your job. Rewrite each flagged line by hand, keeping the meaning,
@@ -89,6 +90,18 @@ PASS, and it is the part a script cannot do.
 The verdict weights the mean at 60% and the **weakest single check** at 40%,
 because one signal is enough. PASS needs an overall of 70+ with no check
 below 55.
+
+**Short text.** Comments, DMs, replies, bios and hooks are too short for some
+checks to measure anything. BURSTINESS needs 4+ sentences and SPECIFICITY needs
+25+ words; below that they show as `n/a` and are left out of the verdict, and
+VOICE is judged on structural tells alone (each one costs half its score,
+because in one line it is most of the text). The output says "judged on 3 of
+5 checks" when that happens. SLOP DENSITY and FINGERPRINT always count, so a
+short draft full of stock words still fails.
+
+Spoken numbers count as concrete: "five hours" scores the same as "5 hours".
+Words inside a URL are not counted as slop, because the humanizer never edits
+inside a link.
 
 ## Say this honestly
 
