@@ -128,9 +128,13 @@ def _match_case(src, repl):
 
 def phrase_pattern(find):
     """Lexicon entry -> regex. Commas between words are optional, so
-    "run don't walk" also catches "Run, don't walk,". Same as detect.py."""
-    body = r",?\s+".join(re.escape(part) for part in find.split())
-    return re.compile(r"\b" + body + r"\b", re.IGNORECASE)
+    "run don't walk" also catches "Run, don't walk,". Either apostrophe
+    matches. \\b goes only on an edge that is a word character, so an entry
+    ending in "?" can match at all. Same as detect.py."""
+    body = r",?\s+".join(re.escape(part).replace("'", "['’]") for part in find.split())
+    head = r"\b" if re.match(r"\w", find) else ""
+    tail = r"\b" if re.search(r"\w$", find) else ""
+    return re.compile(head + body + tail, re.IGNORECASE)
 
 
 # A conjunction left with nothing to join after a deletion. A \x00 before the

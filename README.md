@@ -182,6 +182,11 @@ Short drafts (comments, DMs, replies, a bio) are scored on the checks they are
 long enough for. Sentence variation needs four sentences and the concreteness
 density needs 25 words; under that, those checks show `n/a` instead of a flat
 50 that used to make a PASS impossible for anything shorter than a paragraph.
+A PASS needs all five checks (25+ words and four or more sentences, with
+links and email addresses left out of the count), so a short draft with
+nothing wrong in it comes back `INCONCLUSIVE`, with no score, rather than a
+PASS the panel cannot back up. Stock words or a structural tell in a short
+draft still come back REVIEW or FLAGGED.
 
 Run against a caption written to be as bad as possible:
 

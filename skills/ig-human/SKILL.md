@@ -99,6 +99,16 @@ because in one line it is most of the text). The output says "judged on 3 of
 5 checks" when that happens. SLOP DENSITY and FINGERPRINT always count, so a
 short draft full of stock words still fails.
 
+**INCONCLUSIVE.** A PASS needs all five checks measured and passed, which
+means 25+ words and 4+ sentences. Links and email addresses are taken out
+before counting, so a URL cannot carry a short draft over the line. If even one
+check cannot be measured, a draft with nothing wrong in what could be measured
+gets `INCONCLUSIVE` and no score: part of the panel is not enough to vouch for
+it. That is the normal result for a comment, a DM, a reply or a bio, and it is
+not a failure. A short draft that does fail a measured check is still REVIEW
+or FLAGGED, with a partial score. `detect.py` exits 0 for PASS, 1 for REVIEW
+or FLAGGED and 3 for INCONCLUSIVE.
+
 Spoken numbers count as concrete: "five hours" scores the same as "5 hours".
 Words inside a URL are not counted as slop, because the humanizer never edits
 inside a link.
@@ -118,7 +128,10 @@ do not tell a user their text is undetectable.
 1. `humanize.py draft.txt -o clean.txt --report`
 2. Read the structural flags. Rewrite those lines yourself.
 3. `detect.py draft.txt clean.txt` to show the before and after.
-4. If the verdict is not PASS, fix the weakest check named in the output and go
-   again. Two rounds is normal. Five means the draft was written by formula,
+4. If the verdict is INCONCLUSIVE, stop here: the draft is too short for the
+   panel. It is done when `humanize.py` strips nothing and flags nothing and it
+   reads right out loud. Do not pad it to get a score.
+   If the verdict is REVIEW or FLAGGED, fix the weakest check named in the
+   output and go again. Two rounds is normal. Five means the draft was written by formula,
    and the fix is a different draft, not more passes.
 5. Show the user the cleaned text and the score. Never the score alone.
