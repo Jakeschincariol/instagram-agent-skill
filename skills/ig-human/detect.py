@@ -40,13 +40,127 @@ import statistics
 import sys
 import unicodedata
 
+# --- Devanagari support ------------------------------------------------------
+# The same block is in hookscore.py, beats.py, detect.py, humanize.py,
+# caption.py and swipe.py, so each script still works when it is copied on its
+# own; tests/hindi.py fails if the six copies drift apart. English text has no
+# Devanagari in it, so nothing in this block changes what English input gives.
+import unicodedata as _ud  # noqa: E402
+
+DEVA = "\u0900-\u0963\u0966-\u097f\ua8e0-\ua8ff"    # letters, signs, digits; not the danda
+DANDA = "\u0964\u0965"                               # । and ॥ end a sentence, like "."
+# A joiner or a hyphen inside a word keeps it one word: सोच-समझकर is one word,
+# the way "fast-paced" is one word in English.
+DEVA_WORD_RE = re.compile("[" + DEVA + "]+(?:[\u200c\u200d-][" + DEVA + "]+)*")
+NOT_PROSE_RE = re.compile(r"https?://\S+|www\.\S+|\S+@\S+\.\S+|[#@]\S+")
+CALIBRATION = ("uncalibrated: the thresholds were set on English text, so read "
+               "this as a rough guide for Hindi")
+
+
+def lang_of(text):
+    """'en' if there is no Devanagari word, 'hi' if at least four words in five
+    are Devanagari, otherwise 'mixed'. Links, hashtags and @handles are not
+    counted. Hindi typed in Latin letters ("aap kaise ho") reads as 'en'."""
+    body = NOT_PROSE_RE.sub(" ", text)
+    hi = len(DEVA_WORD_RE.findall(body))
+    if not hi:
+        return "en"
+    en = len(re.findall(r"[A-Za-z]+", body))
+    return "hi" if hi >= 4 * en else "mixed"
+
+
+def deva_fold(text):
+    """One spelling for comparing Hindi, used only for matching, never for
+    output. Each rule joins two spellings of the same word:
+      nukta dropped            ज़रूरी = जरूरी, ग़लत = गलत
+      candrabindu = anusvara   पाँच = पांच
+      visarga dropped          निःसंदेह = निसंदेह, दुःख = दुख
+      त्त्व = त्व                महत्त्वपूर्ण = महत्वपूर्ण
+      -ये / -यी endings        गये = गए, लिये = लिए, नयी = नई (the word ये is kept)
+      यह = ये                  यह कहना = ये कहना
+      hyphen in a compound     भाग-दौड़ = भागदौड़
+      zero-width joiners       dropped
+    Text without Devanagari comes back unchanged."""
+    if not re.search("[" + DEVA + "]", text):
+        return text
+    t = _ud.normalize("NFC", text)
+    t = t.replace("\u093c", "").replace("\u0901", "\u0902").replace("\u0903", "")
+    t = t.replace("\u0924\u094d\u0924\u094d\u0935", "\u0924\u094d\u0935")
+    t = re.sub("[\u200c\u200d]", "", t)
+    t = re.sub("(?<=[" + DEVA + "])-(?=[" + DEVA + "])", "", t)
+    t = re.sub("(?<=[" + DEVA + "])\u092f\u0947(?![" + DEVA + "])", "\u090f", t)
+    t = re.sub("(?<=[" + DEVA + "])\u092f\u0940(?![" + DEVA + "])", "\u0908", t)
+    return re.sub("(?<![" + DEVA + "])\u092f\u0939(?![" + DEVA + "])", "\u092f\u0947", t)
+
+
+def deva_edges(body):
+    """A regex that matches `body` only as whole words. \\b cannot do this for
+    Hindi: Python counts vowel signs as non-word characters, so \\b fires in
+    the middle of रुकिए."""
+    edge = r"[\w" + DEVA + "]"
+    return "(?<!" + edge + ")(?:" + body + ")(?!" + edge + ")"
+
+
+def deva_re(body):
+    """Compile a Hindi pattern. Match it against deva_fold(text)."""
+    return re.compile(deva_edges(deva_fold(body)), re.IGNORECASE)
+
+
+def danda_text(text):
+    """A '|' typed straight after a Hindi word is a danda: many phone keyboards
+    have no ।. Only used for finding sentence ends, never written back."""
+    return re.sub("(?<=[" + DEVA + r"])[ \t]*\|", "\u0964", text)
+
+
+def _deva_set(*groups):
+    return {deva_fold(w) for g in groups for w in g.split()}
+
+
+# Spoken numbers and money words, the Hindi half of SPOKEN_NUMBERS and
+# MONEY_WORDS. एक (one) and पहला (first) are left out for the same reason
+# "one" is: far more often filler than a quantity.
+HI_SPOKEN_NUMBERS = _deva_set(
+    "दो तीन चार पाँच पांच छह छः सात आठ नौ दस ग्यारह बारह पंद्रह बीस पच्चीस तीस",
+    "चालीस पचास साठ सत्तर अस्सी नब्बे सौ हज़ार हजार लाख करोड़ अरब दर्जन",
+    "आधा आधी आधे डेढ़ ढाई साढ़े सवा पौने दोगुना दुगना तिगुना")
+HI_MONEY_WORDS = _deva_set(
+    "रुपये रुपए रुपया रुपयों पैसे पैसा किराया किराए सैलरी तनख़्वाह वेतन मुनाफ़ा",
+    "ब्याज कीमत क़ीमत दाम बजट लोन ईएमआई प्रतिशत फ़ीसदी")
+# The viewer, and the speaker. Same jobs as "you" and "I/we" in English.
+HI_YOU = _deva_set("आप आपका आपकी आपके आपको आपने आपसे तुम तुम्हें तुम्हारा तुम्हारी",
+                   "तुम्हारे तू तेरा तेरी तेरे तुझे")
+HI_ME = _deva_set("मैं मैंने मेरा मेरी मेरे मुझे मुझसे हम हमने हमारा हमारी हमारे हमें")
+# दो is two, and also "give" (पैसे दो, बता दो). As a verb it closes the clause
+# or follows another verb, so it is not counted there.
+_HI_DO_VERB_BEFORE = _deva_set("दे कर बता लिख भेज छोड़ रख ले दिखा समझा सुना")
+_HI_DO_VERB_AFTER = _deva_set("और फिर ना तो जी यार भाई")
+
+
+def hi_number_hits(tokens):
+    """Positions of the Hindi number and money words in a list of
+    deva_fold()ed tokens. Positions, so a caller can show the writer's own
+    spelling rather than the folded one."""
+    hits = []
+    for i, t in enumerate(tokens):
+        if t in HI_SPOKEN_NUMBERS or t in HI_MONEY_WORDS:
+            if t == "दो" and (i == len(tokens) - 1 or (i and tokens[i - 1] in _HI_DO_VERB_BEFORE)
+                              or tokens[i + 1] in _HI_DO_VERB_AFTER):
+                continue
+            hits.append(i)
+    return hits
+# --- end of Devanagari support -----------------------------------------------
+
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 LEX = os.path.join(HERE, "slop.json")
 
 # A full stop between two digits ($18.5k, 3.5 hours) is a decimal point, not
 # the end of a sentence.
-SENT_RE = re.compile(r"(?:[^.!?\n]|(?<=\d)\.(?=\d))+[.!?]*")
-WORD_RE = re.compile(r"[A-Za-z']+")
+SENT_RE = re.compile(r"(?:[^.!?\n" + DANDA + r"]|(?<=\d)\.(?=\d))+[.!?" + DANDA + "]*")
+WORD_RE = re.compile(r"[A-Za-z']+|" + DEVA_WORD_RE.pattern)
+# A zero-width joiner or non-joiner between two Devanagari letters is spelling:
+# it picks the half or full form of a conjunct. It is not a watermark.
+DEVA_JOINER_RE = re.compile("(?<=[" + DEVA + "])[\u200c\u200d](?=[" + DEVA + "])")
 CONTRACTIONS = re.compile(r"\b\w+'(?:s|t|re|ve|ll|d|m)\b", re.IGNORECASE)
 PRONOUNS = re.compile(r"\b(i|me|my|mine|we|us|our|you|your)\b", re.IGNORECASE)
 NUMBERS = re.compile(r"\b\d[\d,.]*%?\b|\$\d")
@@ -106,7 +220,7 @@ def sentences(text):
     # Every sentence counts, including the two-word ones. "Nobody hunts." is
     # exactly the kind of short line a human uses to vary the rhythm, and
     # dropping it made burstiness blind to the thing it measures.
-    return [s.strip() for s in SENT_RE.findall(text) if s.split()]
+    return [s.strip() for s in SENT_RE.findall(danda_text(text)) if s.split()]
 
 
 def words(text):
@@ -142,7 +256,8 @@ def check_specificity(text):
     if len(w) < MIN_WORDS:
         return None, f"n/a: {len(w)} words, needs {MIN_WORDS}+ for a density"
     per100 = 100 / len(w)
-    spoken = [x for x in (t.lower() for t in w) if x in SPOKEN_NUMBERS or x in MONEY_WORDS]
+    spoken = ([x for x in (t.lower() for t in w) if x in SPOKEN_NUMBERS or x in MONEY_WORDS]
+              + hi_number_hits([deva_fold(t) for t in w]))
     hits = len(NUMBERS.findall(text)) + len(set(PROPER.findall(text))) + len(spoken)
     density = hits * per100
     score = scale(density, human=6.0, machine=0.5)
@@ -157,9 +272,12 @@ def check_slop(text, lex):
     if not w:
         return 50.0, "empty"
     hits, found = 0, []
-    for entry in lex["words"] + lex["phrases"]:
-        pattern = phrase_pattern(entry["find"])
-        n = len(pattern.findall(text))
+    folded = deva_fold(text)
+    for entry in lex["words"] + lex["phrases"] + lex.get("hi", []):
+        if DEVA_WORD_RE.search(entry["find"]):    # Hindi entry: whole words, folded spelling
+            n = len(deva_re(re.escape(entry["find"]).replace("\\ ", r",?\s+")).findall(folded))
+        else:
+            n = len(phrase_pattern(entry["find"]).findall(text))
         if n:
             hits += n
             found.append(entry["find"])
@@ -173,7 +291,8 @@ def check_slop(text, lex):
 
 def check_fingerprint(text):
     """Characters a phone keyboard does not produce."""
-    invisible = sum(1 for c in text if unicodedata.category(c) == "Cf")
+    invisible = (sum(1 for c in text if unicodedata.category(c) == "Cf")
+                 - len(DEVA_JOINER_RE.findall(text)))
     em = text.count("—")
     curly = sum(text.count(c) for c in "‘’“”")
     ellip = text.count("…")
@@ -189,6 +308,7 @@ def check_fingerprint(text):
 def check_voice(text, lex):
     """Contractions, person, and the shapes models default to."""
     w = words(text)
+    lang = lang_of(text)
     tells = 0
     names = []
     for s in lex["structures"]:
@@ -208,6 +328,17 @@ def check_voice(text, lex):
             detail += " [" + ", ".join(names[:4]) + "]"
         return clamp(100 - tells * 50), detail
     per100 = 100 / len(w)
+    if lang != "en":
+        # Hindi has no contractions to count, so its VOICE is person and
+        # structural tells, half each. Same pronoun scale as English.
+        person = (len(PRONOUNS.findall(text))
+                  + sum(1 for t in w if deva_fold(t) in HI_YOU or deva_fold(t) in HI_ME)) * per100
+        score = (scale(person, human=8.0, machine=1.0) * 0.5 + clamp(100 - tells * 22) * 0.5)
+        detail = (f"contractions not measured ({lang}), {person:.1f} personal pronouns "
+                  f"per 100 words, {tells} structural tell(s)")
+        if names:
+            detail += " [" + ", ".join(names[:4]) + "]"
+        return clamp(score), detail
     contractions = len(CONTRACTIONS.findall(text)) * per100
     person = len(PRONOUNS.findall(text)) * per100
     bullets = [len(b.split()) for b in re.findall(r"(?m)^\s*[-*•]\s+(.+)$", text)]
@@ -254,7 +385,7 @@ def bar(score, width=24):
     return "#" * filled + "." * (width - filled)
 
 
-def render(results, overall, verdict, label=None, out=sys.stdout):
+def render(results, overall, verdict, label=None, out=sys.stdout, lang=None):
     title = "AI DETECTION PANEL" + (f"  -  {label}" if label else "")
     print("\n" + title, file=out)
     print("=" * max(len(title), 62), file=out)
@@ -283,6 +414,8 @@ def render(results, overall, verdict, label=None, out=sys.stdout):
     elif verdict != "PASS":
         weakest = min(judged, key=lambda c: results[c][0])
         print(f"\n  Weakest signal: {weakest}. Fix that first.", file=out)
+    if lang:
+        print(f"\n  Language: {lang}. Score is {CALIBRATION}.", file=out)
     print("", file=out)
 
 
@@ -313,14 +446,18 @@ def main():
             "checks_judged": sum(1 for v in results.values() if v[0] is not None),
             "complete": all(v[0] is not None for v in results.values()),
         })
+        if lang_of(prose(text)) != "en":     # English output stays exactly as it was
+            payload[-1]["lang"], payload[-1]["calibration"] = lang_of(prose(text)), CALIBRATION
 
     if args.json:
-        print(json.dumps(payload if args.compare else payload[0], indent=2))
+        hindi = any("lang" in p for p in payload)
+        print(json.dumps(payload if args.compare else payload[0], indent=2, ensure_ascii=not hindi))
         return
 
     for (name, text), p in zip(targets, payload):
         results, overall, verdict = run(text, lex)
-        render(results, overall, verdict, label=os.path.basename(name) if args.compare else None)
+        render(results, overall, verdict, label=os.path.basename(name) if args.compare else None,
+               lang=p.get("lang"))
     if args.compare:
         a, b = payload
         fmt = lambda p: "n/a" if p["human_score"] is None else f"{p['human_score']:.1f}"

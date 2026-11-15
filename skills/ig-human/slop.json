@@ -1021,5 +1021,198 @@
       "name": "Reflex follow or tag bait",
       "fix": "Ask for the one action this post actually earns. The generic ask trains the audience to ignore every ask."
     }
+  ],
+  "hi_note": "Hindi stock phrases. detect.py counts them in SLOP DENSITY; humanize.py reports them as tells to rewrite and never replaces them, because a Hindi rewrite needs a native ear. A first draft for a native speaker to review: edit freely.",
+  "hi": [
+    {
+      "find": "आज के इस वीडियो में",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "आज के वीडियो में",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "इस वीडियो में हम",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "आज की इस रील में",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "इस रील में हम",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "आज हम बात करेंगे",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "आज हम जानेंगे",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "जैसा कि आप सभी जानते हैं",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "जैसा कि हम सब जानते हैं",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "आज के इस डिजिटल युग में",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "आज के आधुनिक युग में",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "आज के आधुनिक दौर में",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "आज की भागदौड़ भरी ज़िंदगी में",
+      "family": "openers",
+      "fix": "Delete it and open on the point. Hindi viewers scroll past a preamble as fast as anyone."
+    },
+    {
+      "find": "वीडियो को लाइक करें",
+      "family": "bait",
+      "fix": "Ask for the one action this post earns, in your own words, not the YouTube formula."
+    },
+    {
+      "find": "रील को लाइक करें",
+      "family": "bait",
+      "fix": "Ask for the one action this post earns, in your own words, not the YouTube formula."
+    },
+    {
+      "find": "पोस्ट को लाइक करें",
+      "family": "bait",
+      "fix": "Ask for the one action this post earns, in your own words, not the YouTube formula."
+    },
+    {
+      "find": "चैनल को सब्सक्राइब करें",
+      "family": "bait",
+      "fix": "Ask for the one action this post earns, in your own words, not the YouTube formula."
+    },
+    {
+      "find": "लाइक शेयर और सब्सक्राइब",
+      "family": "bait",
+      "fix": "Ask for the one action this post earns, in your own words, not the YouTube formula."
+    },
+    {
+      "find": "अंत तक ज़रूर देखें",
+      "family": "bait",
+      "fix": "Ask for the one action this post earns, in your own words, not the YouTube formula."
+    },
+    {
+      "find": "वीडियो को अंत तक देखें",
+      "family": "bait",
+      "fix": "Ask for the one action this post earns, in your own words, not the YouTube formula."
+    },
+    {
+      "find": "आखिर तक ज़रूर देखें",
+      "family": "bait",
+      "fix": "Ask for the one action this post earns, in your own words, not the YouTube formula."
+    },
+    {
+      "find": "रील को आखिर तक देखें",
+      "family": "bait",
+      "fix": "Ask for the one action this post earns, in your own words, not the YouTube formula."
+    },
+    {
+      "find": "अत्यंत महत्वपूर्ण",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "अत्यधिक महत्वपूर्ण",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "महत्वपूर्ण भूमिका निभाता है",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "महत्वपूर्ण भूमिका निभाती है",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "महत्वपूर्ण भूमिका निभाते हैं",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "अहम भूमिका निभाता है",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "अहम भूमिका निभाती है",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "अहम भूमिका निभाते हैं",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "निःसंदेह",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "इसमें कोई संदेह नहीं",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "यह कहना गलत नहीं होगा",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "निष्कर्ष के तौर पर",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "निष्कर्ष में कहें तो",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "संक्षेप में कहें तो",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "गेम चेंजर",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    },
+    {
+      "find": "अगले स्तर पर",
+      "family": "formal",
+      "fix": "Nobody talks like this. Say it the way you would say it across a table."
+    }
   ]
 }
