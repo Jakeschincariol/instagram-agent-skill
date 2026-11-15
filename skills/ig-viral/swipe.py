@@ -32,9 +32,120 @@ import re
 import statistics
 import sys
 
+# --- Devanagari support ------------------------------------------------------
+# The same block is in hookscore.py, beats.py, detect.py, humanize.py,
+# caption.py and swipe.py, so each script still works when it is copied on its
+# own; tests/hindi.py fails if the six copies drift apart. English text has no
+# Devanagari in it, so nothing in this block changes what English input gives.
+import unicodedata as _ud  # noqa: E402
+
+DEVA = "\u0900-\u0963\u0966-\u097f\ua8e0-\ua8ff"    # letters, signs, digits; not the danda
+DANDA = "\u0964\u0965"                               # । and ॥ end a sentence, like "."
+# A joiner or a hyphen inside a word keeps it one word: सोच-समझकर is one word,
+# the way "fast-paced" is one word in English.
+DEVA_WORD_RE = re.compile("[" + DEVA + "]+(?:[\u200c\u200d-][" + DEVA + "]+)*")
+NOT_PROSE_RE = re.compile(r"https?://\S+|www\.\S+|\S+@\S+\.\S+|[#@]\S+")
+CALIBRATION = ("uncalibrated: the thresholds were set on English text, so read "
+               "this as a rough guide for Hindi")
+
+
+def lang_of(text):
+    """'en' if there is no Devanagari word, 'hi' if at least four words in five
+    are Devanagari, otherwise 'mixed'. Links, hashtags and @handles are not
+    counted. Hindi typed in Latin letters ("aap kaise ho") reads as 'en'."""
+    body = NOT_PROSE_RE.sub(" ", text)
+    hi = len(DEVA_WORD_RE.findall(body))
+    if not hi:
+        return "en"
+    en = len(re.findall(r"[A-Za-z]+", body))
+    return "hi" if hi >= 4 * en else "mixed"
+
+
+def deva_fold(text):
+    """One spelling for comparing Hindi, used only for matching, never for
+    output. Each rule joins two spellings of the same word:
+      nukta dropped            ज़रूरी = जरूरी, ग़लत = गलत
+      candrabindu = anusvara   पाँच = पांच
+      visarga dropped          निःसंदेह = निसंदेह, दुःख = दुख
+      त्त्व = त्व                महत्त्वपूर्ण = महत्वपूर्ण
+      -ये / -यी endings        गये = गए, लिये = लिए, नयी = नई (the word ये is kept)
+      यह = ये                  यह कहना = ये कहना
+      hyphen in a compound     भाग-दौड़ = भागदौड़
+      zero-width joiners       dropped
+    Text without Devanagari comes back unchanged."""
+    if not re.search("[" + DEVA + "]", text):
+        return text
+    t = _ud.normalize("NFC", text)
+    t = t.replace("\u093c", "").replace("\u0901", "\u0902").replace("\u0903", "")
+    t = t.replace("\u0924\u094d\u0924\u094d\u0935", "\u0924\u094d\u0935")
+    t = re.sub("[\u200c\u200d]", "", t)
+    t = re.sub("(?<=[" + DEVA + "])-(?=[" + DEVA + "])", "", t)
+    t = re.sub("(?<=[" + DEVA + "])\u092f\u0947(?![" + DEVA + "])", "\u090f", t)
+    t = re.sub("(?<=[" + DEVA + "])\u092f\u0940(?![" + DEVA + "])", "\u0908", t)
+    return re.sub("(?<![" + DEVA + "])\u092f\u0939(?![" + DEVA + "])", "\u092f\u0947", t)
+
+
+def deva_edges(body):
+    """A regex that matches `body` only as whole words. \\b cannot do this for
+    Hindi: Python counts vowel signs as non-word characters, so \\b fires in
+    the middle of रुकिए."""
+    edge = r"[\w" + DEVA + "]"
+    return "(?<!" + edge + ")(?:" + body + ")(?!" + edge + ")"
+
+
+def deva_re(body):
+    """Compile a Hindi pattern. Match it against deva_fold(text)."""
+    return re.compile(deva_edges(deva_fold(body)), re.IGNORECASE)
+
+
+def danda_text(text):
+    """A '|' typed straight after a Hindi word is a danda: many phone keyboards
+    have no ।. Only used for finding sentence ends, never written back."""
+    return re.sub("(?<=[" + DEVA + r"])[ \t]*\|", "\u0964", text)
+
+
+def _deva_set(*groups):
+    return {deva_fold(w) for g in groups for w in g.split()}
+
+
+# Spoken numbers and money words, the Hindi half of SPOKEN_NUMBERS and
+# MONEY_WORDS. एक (one) and पहला (first) are left out for the same reason
+# "one" is: far more often filler than a quantity.
+HI_SPOKEN_NUMBERS = _deva_set(
+    "दो तीन चार पाँच पांच छह छः सात आठ नौ दस ग्यारह बारह पंद्रह बीस पच्चीस तीस",
+    "चालीस पचास साठ सत्तर अस्सी नब्बे सौ हज़ार हजार लाख करोड़ अरब दर्जन",
+    "आधा आधी आधे डेढ़ ढाई साढ़े सवा पौने दोगुना दुगना तिगुना")
+HI_MONEY_WORDS = _deva_set(
+    "रुपये रुपए रुपया रुपयों पैसे पैसा किराया किराए सैलरी तनख़्वाह वेतन मुनाफ़ा",
+    "ब्याज कीमत क़ीमत दाम बजट लोन ईएमआई प्रतिशत फ़ीसदी")
+# The viewer, and the speaker. Same jobs as "you" and "I/we" in English.
+HI_YOU = _deva_set("आप आपका आपकी आपके आपको आपने आपसे तुम तुम्हें तुम्हारा तुम्हारी",
+                   "तुम्हारे तू तेरा तेरी तेरे तुझे")
+HI_ME = _deva_set("मैं मैंने मेरा मेरी मेरे मुझे मुझसे हम हमने हमारा हमारी हमारे हमें")
+# दो is two, and also "give" (पैसे दो, बता दो). As a verb it closes the clause
+# or follows another verb, so it is not counted there.
+_HI_DO_VERB_BEFORE = _deva_set("दे कर बता लिख भेज छोड़ रख ले दिखा समझा सुना")
+_HI_DO_VERB_AFTER = _deva_set("और फिर ना तो जी यार भाई")
+
+
+def hi_number_hits(tokens):
+    """Positions of the Hindi number and money words in a list of
+    deva_fold()ed tokens. Positions, so a caller can show the writer's own
+    spelling rather than the folded one."""
+    hits = []
+    for i, t in enumerate(tokens):
+        if t in HI_SPOKEN_NUMBERS or t in HI_MONEY_WORDS:
+            if t == "दो" and (i == len(tokens) - 1 or (i and tokens[i - 1] in _HI_DO_VERB_BEFORE)
+                              or tokens[i + 1] in _HI_DO_VERB_AFTER):
+                continue
+            hits.append(i)
+    return hits
+# --- end of Devanagari support -----------------------------------------------
+
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOOKS = os.path.join(HERE, "..", "ig-reel", "hooks.json")
-WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
+WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+|" + DEVA_WORD_RE.pattern)
 
 try:                                              # optional: score the hooks too
     sys.path.insert(0, os.path.join(HERE, "..", "ig-reel"))
@@ -50,15 +161,22 @@ def load_formulas(path):
         return None
     by_id = {h["id"]: h for h in d["hooks"]}
     order = d.get("classify_order") or sorted(by_id)
+    # match_hi is the Hindi version of a formula's pattern, optional. It is
+    # matched as whole words against deva_fold(hook), and only for hooks that
+    # have Devanagari in them, so English hooks are named exactly as before.
     return [(by_id[i]["id"], by_id[i]["name"],
-             re.compile(by_id[i]["match"], re.IGNORECASE)) for i in order if i in by_id]
+             re.compile(by_id[i]["match"], re.IGNORECASE),
+             deva_re(by_id[i]["match_hi"]) if by_id[i].get("match_hi") else None)
+            for i in order if i in by_id]
 
 
 def classify(hook, formulas):
     if not formulas:
         return None, "unclassified"
-    for fid, name, pattern in formulas:
-        if pattern.search(hook):
+    hindi = lang_of(hook) != "en"
+    folded = deva_fold(hook)
+    for fid, name, pattern, hi_pattern in formulas:
+        if pattern.search(hook) or (hindi and hi_pattern and hi_pattern.search(folded)):
             return fid, name
     return None, "unclassified"
 
@@ -114,6 +232,8 @@ def analyse(rows, formulas):
         r["outlier"] = round(r["views"] / base, 2) if base else None
         r["formula_id"], r["formula"] = classify(r["hook"], formulas)
         r["words"] = len(WORD_RE.findall(r["hook"]))
+        if lang_of(r["hook"]) != "en":       # English rows stay exactly as they were
+            r["lang"] = lang_of(r["hook"])
         if score_hook:
             _, overall, verdict, _ = score_hook(r["hook"])
             r["hook_score"], r["hook_verdict"] = round(overall, 1), verdict

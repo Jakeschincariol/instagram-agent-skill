@@ -153,3 +153,19 @@ not a hook.
 ```
 
 These are real `hookscore.py` scores. Re-run them if you change the scorer.
+
+## Hindi and mixed scripts
+
+The scripts read Devanagari. A Hindi word counts as one word, । and ॥ end a sentence (so does a `|` typed after a Hindi word), and common spelling variants compare equal: nukta or none (ज़रूरी, जरूरी), candrabindu or anusvara (पाँच, पांच), visarga or none (निःसंदेह, निसंदेह), महत्त्व or महत्व, -ये or -ए endings (गये, गए), यह or ये, and a hyphenated compound (भाग-दौड़, भागदौड़), which counts as one word. Each tool decides whether the text is `en`, `hi` or `mixed` (Hindi and English words together, as most Hinglish is). English output is exactly what it was: no new fields, no new lines.
+
+- `hookscore.py` knows Hindi stakes (नहीं, मत, गलती, नुकसान, रुकिए...), Hindi numbers and money
+  words (पाँच, हज़ार, लाख, करोड़, रुपये), Hindi weak openers (नमस्ते, दोस्तों, तो, आज...), the Hindi
+  greeting and video preamble ("आज के इस वीडियो में") as dealbreakers, and that a Hindi command
+  usually comes last ("...protein shake मत लीजिए").
+- `beats.py` times Hindi and mixed scripts at 150 wpm unless you pass `--wpm`, because Hindi read
+  aloud runs slower per word than English.
+- `hooks.json`: 25 of the 26 formulas carry `match_hi`, the same shape in conversational Hindi.
+- **Hindi hook scores are uncalibrated.** The thresholds were set on English hooks, so the JSON
+  carries `"lang"` and `"calibration"` and the text output says so. Tell the user. Until there are
+  about 30 real Hindi hooks with known results to calibrate against, use the score to catch
+  greetings, preambles and vague hooks, not to rank two decent ones.

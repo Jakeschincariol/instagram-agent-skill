@@ -24,6 +24,14 @@ for l in fails:
     print("   " + l)
 ok &= rc == 0 and not fails
 
+rc, out = run("hindi", ["hindi.py"])
+fails = [l for l in out.splitlines() if l.startswith("FAIL")]
+summary = (re.findall(r"\d+ passed, \d+ failed", out) or ["no summary"])[-1]
+print(f"hindi      : {summary}")
+for l in fails:
+    print("   " + l)
+ok &= rc == 0 and not fails
+
 rc, out = run("functional", ["validate.py"])
 counts = re.findall(r"^(ig-[a-z]+): (\d+)/(\d+) checks pass", out, re.M)
 passed = sum(int(a) for _, a, _ in counts); total = sum(int(b) for _, _, b in counts)

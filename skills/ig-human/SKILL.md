@@ -135,3 +135,18 @@ do not tell a user their text is undetectable.
    output and go again. Two rounds is normal. Five means the draft was written by formula,
    and the fix is a different draft, not more passes.
 5. Show the user the cleaned text and the score. Never the score alone.
+
+## Hindi and mixed drafts
+
+The scripts read Devanagari. A Hindi word counts as one word, । and ॥ end a sentence (so does a `|` typed after a Hindi word), and common spelling variants compare equal: nukta or none (ज़रूरी, जरूरी), candrabindu or anusvara (पाँच, पांच), visarga or none (निःसंदेह, निसंदेह), महत्त्व or महत्व, -ये or -ए endings (गये, गए), यह or ये, and a hyphenated compound (भाग-दौड़, भागदौड़), which counts as one word. Each tool decides whether the text is `en`, `hi` or `mixed` (Hindi and English words together, as most Hinglish is). English output is exactly what it was: no new fields, no new lines.
+
+- `detect.py` counts Hindi words, sentences, pronouns (मैं, हम, आप, तुम...) and number words. Hindi
+  has no contractions, so for `hi` and `mixed` text VOICE is pronouns and structural tells, half
+  each, and says so in its detail. The `hi` group in `slop.json` lists Hindi stock phrases ("आज के
+  इस डिजिटल युग में", "अत्यंत महत्वपूर्ण", "वीडियो को लाइक करें"...) and they count in SLOP DENSITY.
+- `humanize.py` never rewrites Hindi. Hindi stock phrases are reported under structural tells for
+  you to rewrite, because a good Hindi replacement needs a native ear. A zero-width joiner or
+  non-joiner between two Devanagari letters is kept, since it chooses how a conjunct is drawn;
+  anywhere else it is still removed.
+- **Hindi scores are uncalibrated**: the thresholds were set on English. The JSON carries `"lang"`
+  and `"calibration"`. Say so when you show a Hindi score, and read the draft out loud as well.

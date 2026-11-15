@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "note": "26 hook formulas for Reels. A Reel has two hooks that fire at the same time and they are not the same sentence: the first thing you say, and the first thing on screen. The spoken hook has about two seconds. The on-screen hook has about one, because it is read before it is heard. Every formula here carries a template, a filled example, the on-screen version, what it is for, and the way it usually gets ruined. Each formula also carries a `match` regex, so the same vocabulary can name a hook found in the wild and not only write a new one. Walk them in `classify_order`, which is most specific first, case-insensitive.",
+  "note": "26 hook formulas for Reels. A Reel has two hooks that fire at the same time and they are not the same sentence: the first thing you say, and the first thing on screen. The spoken hook has about two seconds. The on-screen hook has about one, because it is read before it is heard. Every formula here carries a template, a filled example, the on-screen version, what it is for, and the way it usually gets ruined. Each formula also carries a `match` regex, so the same vocabulary can name a hook found in the wild and not only write a new one. Walk them in `classify_order`, which is most specific first, case-insensitive. Most formulas also carry `match_hi`, the same shape in conversational Hindi, matched as whole words on hooks that contain Devanagari.",
   "rules": [
     "Write the spoken line and the on-screen line separately. On screen is the shorter, blunter one, six words or fewer, no punctuation it does not need.",
     "No setup. The video starts at the sentence you would normally reach at second six.",
@@ -18,7 +18,8 @@
       "on_screen": "$18,000 MISTAKE",
       "best_for": "Trust, fast. People finish the videos where you are the one who looks bad.",
       "trap": "A fake cost. 'It cost me my peace of mind' is not a number and everybody can hear that.",
-      "match": "\\$\\s?\\d[\\d,]*\\s+(?:is|was) what\\b|\\bcost (?:me|us|him|her|them)\\b|\\blost\\b[^.!?]{0,20}\\$\\s?\\d"
+      "match": "\\$\\s?\\d[\\d,]*\\s+(?:is|was) what\\b|\\bcost (?:me|us|him|her|them)\\b|\\blost\\b[^.!?]{0,20}\\$\\s?\\d",
+      "match_hi": "(?:₹|रु\\.?|rs\\.?)\\s?\\d[\\d,]*[^।.!?]{0,30}(?:नुकसान|घाटा|डूब|गँवा|गंवा)|(?:नुकसान|घाटा) (?:हुआ|हो गया|उठाया|झेला)|(?:मुझे|हमें|मेरे|मेरा|मेरी)[^।.!?]{0,25}(?:लाख|हज़ार|करोड़)[^।.!?]{0,15}(?:डूब|गँवा|खो|नुकसान)"
     },
     {
       "id": 2,
@@ -28,7 +29,8 @@
       "on_screen": "STOP POSTING DAILY",
       "best_for": "Saves and arguments. The imperative gets attention that a statement does not.",
       "trap": "Telling people to stop doing something nobody does. The habit has to be one the viewer recognises in themselves.",
-      "match": "^\\s*(?:stop|quit|never|don'?t|dont|please)\\b[^.!?]{0,30}\\b(?:do|be|make|buy|use|start|say|post|send|take|charge)?\\b|\\b(?:do not|don'?t|dont|never) (?:do|be|make|buy|use|start|say|post|take)\\b|\\bquit your\\b"
+      "match": "^\\s*(?:stop|quit|never|don'?t|dont|please)\\b[^.!?]{0,30}\\b(?:do|be|make|buy|use|start|say|post|send|take|charge)?\\b|\\b(?:do not|don'?t|dont|never) (?:do|be|make|buy|use|start|say|post|take)\\b|\\bquit your\\b",
+      "match_hi": "^\\s*(?:मत|कभी मत|कभी भी मत|रुकिए|रुको|रुकें)|(?:मत|ना|न) (?:करो|करें|कीजिए|करिए|करना|खरीदो|खरीदें|खरीदिए|खरीदना|लो|लें|लीजिए|लेना|दो|दें|दीजिए|देना|भरो|भरें|भरिए|भरना|भूलें|भूलिए|भूलना|छोड़ें|छोड़ना|रखें|रखना)|(?:रुकिए|रुको|रुकें)\\s*[।.!]?\\s*$"
     },
     {
       "id": 3,
@@ -38,7 +40,8 @@
       "on_screen": "YOUR FIRST 30 WILL FLOP",
       "best_for": "New audiences. It positions you as the person who says the quiet part.",
       "trap": "Picking a truth everybody already says. If the comments are agreeing before you finish, it was not a secret.",
-      "match": "\\b(?:nobody|no one|nobody ever)\\s+(?:ever\\s+)?(?:tells|told|talks|talked|says|said|mentions|teaches)\\b|\\bwhat (?:nobody|no one) (?:tells|says)\\b"
+      "match": "\\b(?:nobody|no one|nobody ever)\\s+(?:ever\\s+)?(?:tells|told|talks|talked|says|said|mentions|teaches)\\b|\\bwhat (?:nobody|no one) (?:tells|says)\\b",
+      "match_hi": "(?:कोई|किसी ने)\\s+(?:[^\\s।.!?]+\\s+){0,3}(?:नहीं|नही)\\s+(?:बताता|बताती|बताएगा|बताया|बताते|सिखाता|कहता|बोलता)"
     },
     {
       "id": 4,
@@ -48,7 +51,8 @@
       "on_screen": "$2,000 -> $12",
       "best_for": "Demos and tool videos. The price gap does the work.",
       "trap": "Overstating the replacement. If it replaced 60% of the job, say 60%, or the comments will say it for you.",
-      "match": "\\breplaced?\\b[^.!?]*\\$\\s?\\d|\\$\\s?\\d[^.!?]*\\breplaced?\\b|\\binstead of (?:paying|hiring)\\b"
+      "match": "\\breplaced?\\b[^.!?]*\\$\\s?\\d|\\$\\s?\\d[^.!?]*\\breplaced?\\b|\\binstead of (?:paying|hiring)\\b",
+      "match_hi": "(?:₹|\\d)[^।.!?]{0,40}की जगह ले (?:ली|लिया|लेगा|लेगी|लेता|लेती)|की जगह ले (?:ली|लिया|लेगा|लेगी|लेता|लेती)[^।.!?]{0,40}(?:₹|\\d)|के बजाय[^।.!?]{0,40}(?:₹|\\d)|(?:₹|\\d)[^।.!?]{0,40}के बजाय"
     },
     {
       "id": 5,
@@ -58,7 +62,8 @@
       "on_screen": "5 HOURS -> 20 MIN",
       "best_for": "Process videos where the payoff is speed. Reads instantly on screen.",
       "trap": "A ratio nobody believes. 40 hours to 4 seconds gets treated as a lie even when it is true.",
-      "match": "\\bused to take\\b|\\bnow (?:it )?(?:only )?takes?\\b|\\btakes? (?:me )?\\d+\\s*(?:sec|second|min|minute|hour|hr)"
+      "match": "\\bused to take\\b|\\bnow (?:it )?(?:only )?takes?\\b|\\btakes? (?:me )?\\d+\\s*(?:sec|second|min|minute|hour|hr)",
+      "match_hi": "\\d+\\s*(?:सेकंड|मिनट|घंटे|घंटा|दिन|हफ़्ते|हफ़्ता|महीने|महीना|साल)\\s+(?:लगते थे|लगता था|लगती थी|लग जाते थे|लग जाता था|लग जाती थी)|(?:दो|तीन|चार|पाँच|छह|सात|आठ|दस|बीस|तीस|पूरा|पूरे|आधा|आधे) (?:सेकंड|मिनट|घंटे|घंटा|दिन|हफ़्ते|हफ़्ता|महीने|महीना|साल) (?:लगते थे|लगता था|लगती थी|लग जाते थे|लग जाता था|लग जाती थी)|अब (?:सिर्फ़ |बस |केवल )?\\d+\\s*(?:सेकंड|मिनट|घंटे|दिन)|(?:अब|आज) (?:सिर्फ़ |बस |केवल )?(?:दो|तीन|चार|पाँच|दस|बीस|तीस) (?:मिनट|घंटे|दिन)"
     },
     {
       "id": 6,
@@ -68,7 +73,8 @@
       "on_screen": "60 DAYS. REAL NUMBERS.",
       "best_for": "Experiments. Pairs with a screen recording of the real dashboard, which is the whole value.",
       "trap": "Not showing the screen. A numbers video with no screen recording is a numbers claim.",
-      "match": "\\bi\\s+\\w+(?:ed)?\\s+[^.!?]{0,30}\\bfor\\s+\\d+\\s+(?:days?|weeks?|months?|years?)\\b|\\bhere (?:are|is) (?:the|my)\\b[^.!?]*\\bnumbers\\b|\\bwe(?:'ll| will)? do \\$\\s?\\d"
+      "match": "\\bi\\s+\\w+(?:ed)?\\s+[^.!?]{0,30}\\bfor\\s+\\d+\\s+(?:days?|weeks?|months?|years?)\\b|\\bhere (?:are|is) (?:the|my)\\b[^.!?]*\\bnumbers\\b|\\bwe(?:'ll| will)? do \\$\\s?\\d",
+      "match_hi": "\\d+\\s+(?:दिन|हफ़्ते|महीने|साल) (?:तक|लगातार)|(?:असली|real|सच्चे) (?:नंबर|numbers|आँकड़े)"
     },
     {
       "id": 7,
@@ -78,7 +84,8 @@
       "on_screen": "YOUR CAPTIONS ARE CUT",
       "best_for": "Teaching. The 'not your fault' half stops it reading as an insult, which is what kills this one.",
       "trap": "Skipping the absolution. 'You are doing it wrong' on its own makes people leave rather than learn.",
-      "match": "\\b(?:big(?:gest)?|common|the) mistake\\b|\\bmistake (?:that|people|i)\\b|\\byou'?(?:re| are) doing\\b[^.!?]*\\bwrong\\b|\\bdoing (?:it|this) wrong\\b"
+      "match": "\\b(?:big(?:gest)?|common|the) mistake\\b|\\bmistake (?:that|people|i)\\b|\\byou'?(?:re| are) doing\\b[^.!?]*\\bwrong\\b|\\bdoing (?:it|this) wrong\\b",
+      "match_hi": "(?:सबसे बड़ी|बड़ी|आम) (?:गलती|गलतियाँ)|गलत (?:तरीके|तरीका|तरीक़े)|(?:गलती|गलतियाँ) (?:जो|करते|कर रहे)|आप[^।.!?]{0,30}गलत (?:कर रहे|करते)"
     },
     {
       "id": 8,
@@ -88,7 +95,8 @@
       "on_screen": "6 YEARS INSIDE",
       "best_for": "Authority without a credential slide. Works only if the years are real.",
       "trap": "Promising a secret and delivering the brochure. The comments are merciless about this one.",
-      "match": "\\bi (?:spent|worked|ran|was|have been)\\b[^.!?]*\\b\\d+\\s*\\+?\\s*years?\\b|\\bwe never (?:told|said|showed)\\b|\\bnobody (?:puts|tells you about)\\b|\\bi (?:sell|sold|run)\\b[^.!?]*\\$\\s?\\d"
+      "match": "\\bi (?:spent|worked|ran|was|have been)\\b[^.!?]*\\b\\d+\\s*\\+?\\s*years?\\b|\\bwe never (?:told|said|showed)\\b|\\bnobody (?:puts|tells you about)\\b|\\bi (?:sell|sold|run)\\b[^.!?]*\\$\\s?\\d",
+      "match_hi": "मैंने\\s[^।.!?]{0,30}\\d+\\s*\\+?\\s*(?:साल|वर्ष)(?!\\s+(?:का|की|के)(?:\\s|$|[,।.!?]))|(?:मैं|हम)\\s[^।.!?]{0,30}\\d+\\s*\\+?\\s*(?:साल|वर्ष)\\s+से|अंदर की बात|(?:जो|ये) (?:बिल्डर|एजेंट|ब्रोकर|डीलर|बैंक)[^।.!?]{0,20}(?:नहीं|नही) (?:बताते|बताता|बताएंगे)"
     },
     {
       "id": 9,
@@ -98,7 +106,8 @@
       "on_screen": "STEAL THIS",
       "best_for": "Saves and sends, which are the two metrics that move reach the most.",
       "trap": "The artifact not being on screen. If they cannot screenshot it, there is nothing to steal.",
-      "match": "^\\s*steal\\b|\\bsteal (?:this|these|my)\\b|^\\s*(?:here'?s|this is) (?:the|my) (?:exact|literal)\\b"
+      "match": "^\\s*steal\\b|\\bsteal (?:this|these|my)\\b|^\\s*(?:here'?s|this is) (?:the|my) (?:exact|literal)\\b",
+      "match_hi": "^\\s*(?:ये|यह) (?:कॉपी|copy) (?:कर लो|कर लीजिए|करें|कीजिए|कर लें)|(?:मेरा|मेरी) (?:exact|पूरा|पूरी) (?:template|टेम्पलेट|checklist|चेकलिस्ट|लिस्ट)"
     },
     {
       "id": 10,
@@ -108,7 +117,8 @@
       "on_screen": "VIEWS BUT NO FOLLOWERS?",
       "best_for": "Qualifying hard. Fewer people stay, and the ones who do are the ones who buy.",
       "trap": "A situation so broad it qualifies nobody. 'If you want to grow' is not a situation.",
-      "match": "^\\s*if (?:you|i|we|your|my|they)\\b"
+      "match": "^\\s*if (?:you|i|we|your|my|they)\\b",
+      "match_hi": "^\\s*(?:अगर|यदि) (?:आप|आपका|आपकी|आपके|आपको|आपने|तुम|तुम्हारा|मैं|हम)"
     },
     {
       "id": 11,
@@ -118,7 +128,8 @@
       "on_screen": "5 EDITS. #4 IS THE ONE.",
       "best_for": "Retention through the middle: naming a favourite gives people a reason to stay past three.",
       "trap": "N above seven. Nobody believes you have nine good ones, and you do not.",
-      "match": "^\\s*(?:here are\\s+)?\\d+\\s+\\w+|\\bnumber \\d+\\b|\\b(?:three|four|five|seven|ten)\\s+\\w+\\s+(?:every|that|you)\\b"
+      "match": "^\\s*(?:here are\\s+)?\\d+\\s+\\w+|\\bnumber \\d+\\b|\\b(?:three|four|five|seven|ten)\\s+\\w+\\s+(?:every|that|you)\\b",
+      "match_hi": "^\\s*\\d+\\s+[^\\s।.!?]+|(?:नंबर|number) \\d+|(?:\\d+|दो|तीन|चार|पाँच|छह|सात|आठ|नौ|दस)\\s+(?:चीज़ें|बातें|गलतियाँ|तरीके|जाँच|टिप्स|कदम|सवाल|कागज़)"
     },
     {
       "id": 12,
@@ -128,7 +139,8 @@
       "on_screen": "\"I HATE BEING ON CAMERA\"",
       "best_for": "Selling to the people who already said no once.",
       "trap": "Inventing the objection. Pull it verbatim from a DM or a comment, including the bad grammar.",
-      "match": "^\\s*[\\\"“'][^\\\"”']{5,120}[\\\"”'][,.]?\\s*(?:fine|ok|okay|sure|right|here)"
+      "match": "^\\s*[\\\"“'][^\\\"”']{5,120}[\\\"”'][,.]?\\s*(?:fine|ok|okay|sure|right|here)",
+      "match_hi": "^\\s*[\\\"“'][^\\\"”']{5,120}[\\\"”'][,.।]?\\s*(?:ठीक है|कोई बात नहीं|चलिए|तो|सही है)"
     },
     {
       "id": 13,
@@ -138,7 +150,8 @@
       "on_screen": "MARCH  /  NOW",
       "best_for": "Anything visual. The cut between the two frames is the hook, the words are secondary.",
       "trap": "Three levers. Name one thing that changed or the transformation stops being believable.",
-      "match": "\\b(?:this|that) was\\b[^.!?]*[.!?]\\s*(?:this|that) is\\b|\\bbefore\\b[^.!?]*\\bafter\\b|\\bi (?:look|looked) back at\\b"
+      "match": "\\b(?:this|that) was\\b[^.!?]*[.!?]\\s*(?:this|that) is\\b|\\bbefore\\b[^.!?]*\\bafter\\b|\\bi (?:look|looked) back at\\b",
+      "match_hi": "^\\s*(?:ये|यह) (?:था|थी)[^।.!?]*[।.!?]\\s*(?:ये|यह) (?:है|हैं)"
     },
     {
       "id": 14,
@@ -148,7 +161,8 @@
       "on_screen": "PHOTOGRAPHERS UNDER $2K",
       "best_for": "Cutting a broad audience down to the one that converts. Send rate goes up because people tag each other.",
       "trap": "A group so large it is not a callout. 'Entrepreneurs' is not a group.",
-      "match": "^\\s*(?:every|all|any)\\s+\\w+|^\\s*[a-z][\\w ]{2,28}(?:ers|ists|ors|ants)\\b\\s*[,:]|^\\s*for (?:viewers|people|anyone|those|everyone)\\b|^\\s*(?:attention|listen up)\\b"
+      "match": "^\\s*(?:every|all|any)\\s+\\w+|^\\s*[a-z][\\w ]{2,28}(?:ers|ists|ors|ants)\\b\\s*[,:]|^\\s*for (?:viewers|people|anyone|those|everyone)\\b|^\\s*(?:attention|listen up)\\b",
+      "match_hi": "^\\s*(?:सभी|हर|सारे) [^\\s।]+ (?:के लिए|ध्यान दें)|^\\s*[^\\s।,]+ (?:खरीदने|बेचने|लेने|बनाने) वाले|वालों के लिए|^\\s*(?:ध्यान दें|सावधान)"
     },
     {
       "id": 15,
@@ -158,7 +172,8 @@
       "on_screen": "47 FLOPS, THEN THIS",
       "best_for": "People at the start, which is most of the audience. High comment rate.",
       "trap": "Making the change sound like luck. If the answer is 'I got lucky', there is no video.",
-      "match": "\\bmy first\\s+\\d+\\b|\\bfirst\\s+\\d+\\s+(?:reels?|videos?|posts?|clients?|months?)\\b"
+      "match": "\\bmy first\\s+\\d+\\b|\\bfirst\\s+\\d+\\s+(?:reels?|videos?|posts?|clients?|months?)\\b",
+      "match_hi": "(?:मेरी|मेरे|मेरा) (?:पहली|पहले|पहला) \\d+"
     },
     {
       "id": 16,
@@ -168,7 +183,8 @@
       "on_screen": "ASKED EVERY WEEK",
       "best_for": "Search. A question typed the way people type it is what Instagram search is matching against.",
       "trap": "Tidying the question up. The value is that it is in their words, typos and all.",
-      "match": "^\\s*[\\\"“']?(?:how|what|what'?s|why|when|where|who|which|can|should|do|does|did|is|are|have you|would you)\\b[^?]{3,110}\\?"
+      "match": "^\\s*[\\\"“']?(?:how|what|what'?s|why|when|where|who|which|can|should|do|does|did|is|are|have you|would you)\\b[^?]{3,110}\\?",
+      "match_hi": "^[^?]{0,40}?(?:^|\\s)(?:क्या|कैसे|क्यों|कब|कहाँ|कौन|कितना|कितनी|कितने)\\s[^?]{0,110}\\?"
     },
     {
       "id": 17,
@@ -178,7 +194,8 @@
       "on_screen": "CAROUSELS vs REELS",
       "best_for": "Comments. People arrive already holding an opinion, which is the point.",
       "trap": "Refusing to pick. A comparison with a diplomatic ending is a video with no ending.",
-      "match": "\\b(?:vs\\.?|versus)\\b|\\bdifferences? between\\b|\\b(?:a|the) or (?:b|the)\\b"
+      "match": "\\b(?:vs\\.?|versus)\\b|\\bdifferences? between\\b|\\b(?:a|the) or (?:b|the)\\b",
+      "match_hi": "बनाम|(?:के बीच|में) (?:अंतर|फ़र्क)|(?:कौन सा|कौनसा) (?:बेहतर|सही)|[^\\s।,]+ या [^\\s।,?]+\\s*[,:]?\\s+[^।.!?]{0,30}(?:क्या सही|क्या बेहतर|किसमें फ़ायदा)"
     },
     {
       "id": 18,
@@ -188,7 +205,8 @@
       "on_screen": "WATCH THIS",
       "best_for": "Screen recordings and anything with a visible result. No setup at all, the hand is already moving.",
       "trap": "A result that takes twelve seconds to arrive. If the payoff is slow, cut to it and show the wait afterwards.",
-      "match": "^\\s*watch (?:what|this|me)\\b|^\\s*(?:let me|lemme) show you\\b|^\\s*repeat after me\\b"
+      "match": "^\\s*watch (?:what|this|me)\\b|^\\s*(?:let me|lemme) show you\\b|^\\s*repeat after me\\b",
+      "match_hi": "^\\s*(?:देखिए|देखो|देखें) (?:क्या|ये|यह|कैसे|मैं)|^\\s*(?:चलिए|आइए) (?:दिखाता|दिखाती|दिखाते|देखते)"
     },
     {
       "id": 19,
@@ -198,7 +216,8 @@
       "on_screen": "BEFORE YOU POST AGAIN",
       "best_for": "Urgency that is real. Platform changes, seasonal windows, policy updates.",
       "trap": "Manufactured urgency. One fake deadline and every future one is discounted.",
-      "match": "\\bbefore (?:you|it|they|the)\\b[^.!?]*\\b(?:change|changes|end|ends|close|closes|expires|goes)\\b|\\bchanges on\\b|\\bby 20\\d\\d\\b"
+      "match": "\\bbefore (?:you|it|they|the)\\b[^.!?]*\\b(?:change|changes|end|ends|close|closes|expires|goes)\\b|\\bchanges on\\b|\\bby 20\\d\\d\\b",
+      "match_hi": "(?:देने|लेने|खरीदने|करने|भरने|बेचने|sign करने|साइन करने) से पहले|(?:के बाद|बाद में) (?:पछता|मौका नहीं)|(?:आख़िरी|अंतिम) (?:तारीख़|मौका)"
     },
     {
       "id": 20,
@@ -208,7 +227,8 @@
       "on_screen": "YOU DON'T NEED A NICHE",
       "best_for": "Relief. Very high save rate, because it removes a blocker rather than adding a task.",
       "trap": "Removing the blocker and putting nothing in its place. The second half is the whole video.",
-      "match": "\\byou (?:do not|don'?t|dont) need\\b|\\bstop (?:trying to|worrying about)\\b"
+      "match": "\\byou (?:do not|don'?t|dont) need\\b|\\bstop (?:trying to|worrying about)\\b",
+      "match_hi": "(?:आपको|तुम्हें)\\s[^।.!?]{0,20}(?:ज़रूरत|जरूरत) (?:नहीं|नही)|(?:ज़रूरी|जरूरी) (?:नहीं|नही)"
     },
     {
       "id": 21,
@@ -218,7 +238,8 @@
       "on_screen": "HE ASKED FOR A REFUND",
       "best_for": "Stories. Starting mid-scene makes the viewer feel they arrived late, which is a reason to stay.",
       "trap": "Never going back to fill in the gap. Deliver the setup by second eight or it reads as a mistake.",
-      "match": "^\\s*(?:\\.\\.\\.|…)|^\\s*(?:and (?:that'?s|that is|then) when|so (?:he|she|they) (?:said|asked))\\b|^\\s*(?:uh|um)\\b"
+      "match": "^\\s*(?:\\.\\.\\.|…)|^\\s*(?:and (?:that'?s|that is|then) when|so (?:he|she|they) (?:said|asked))\\b|^\\s*(?:uh|um)\\b",
+      "match_hi": "^\\s*(?:और (?:तब|फिर|उसी वक़्त)|तो (?:उसने|उन्होंने) (?:कहा|पूछा))"
     },
     {
       "id": 22,
@@ -238,7 +259,8 @@
       "on_screen": "33% NEVER READ AGAIN",
       "best_for": "Sends. A number a person can repeat at dinner gets sent to somebody.",
       "trap": "A statistic you cannot source. Say where it came from in the video or do not use it.",
-      "match": "^\\s*\\d[\\d,.]*\\s?%|\\b\\d[\\d,.]*\\s?%\\s+of\\b"
+      "match": "^\\s*\\d[\\d,.]*\\s?%|\\b\\d[\\d,.]*\\s?%\\s+of\\b",
+      "match_hi": "\\d+\\s?(?:प्रतिशत|फ़ीसदी)|\\d+ में से \\d+"
     },
     {
       "id": 24,
@@ -248,7 +270,8 @@
       "on_screen": "THE NEW ONE",
       "best_for": "Anything physical or visual. The object is the hook and the words are captions on it.",
       "trap": "Holding the thing up without saying what it changes. A reveal with no stake is an advert.",
-      "match": "^\\s*(?:so,?\\s+)?(?:this|these|here) (?:is|are)\\s+(?:the\\s+)?(?:new|my new)\\b|^\\s*(?:so,?\\s+)?this (?:new|tiny|little)\\b|^\\s*this \\w+ has (?:the|a)\\b"
+      "match": "^\\s*(?:so,?\\s+)?(?:this|these|here) (?:is|are)\\s+(?:the\\s+)?(?:new|my new)\\b|^\\s*(?:so,?\\s+)?this (?:new|tiny|little)\\b|^\\s*this \\w+ has (?:the|a)\\b",
+      "match_hi": "^\\s*(?:ये|यह|यही) (?:है|हैं) (?:नया|नई|नए|मेरा नया|मेरी नई)|^\\s*(?:ये|यह) (?:नया|नई|नए)"
     },
     {
       "id": 25,
@@ -258,7 +281,8 @@
       "on_screen": "1M SUBS IN ONE MONTH",
       "best_for": "Proof when the user does not have their own number yet. Third-person is allowed if it is true.",
       "trap": "No name and no link. An anonymous miracle is a rumour.",
-      "match": "\\bthere (?:was|is) (?:one|a|this)\\b|\\b(?:one|a) (?:guy|girl|creator|student|founder|kid|client|friend) (?:i know |who |that )(?:\\w+ed|grew|made|built|went|took|got|hit)\\b|\\bwe had a new\\b"
+      "match": "\\bthere (?:was|is) (?:one|a|this)\\b|\\b(?:one|a) (?:guy|girl|creator|student|founder|kid|client|friend) (?:i know |who |that )(?:\\w+ed|grew|made|built|went|took|got|hit)\\b|\\bwe had a new\\b",
+      "match_hi": "(?:एक|मेरे एक|मेरी एक) (?:client|क्लाइंट|दोस्त|ग्राहक|खरीदार|परिवार|भाई|अंकल|आंटी)\\s+(?:ने|के साथ|को|थे|थी)"
     },
     {
       "id": 26,
@@ -268,7 +292,8 @@
       "on_screen": "THE FASTEST WAY",
       "best_for": "One-claim videos with no story attached. It is the most common shape in the wild and the easiest to write badly.",
       "trap": "A superlative with a soft answer. If the second half is 'consistency', you have said nothing and the comments will tell you.",
-      "match": "^\\s*(?:the\\s+)?(?:fastest|quickest|best|worst|biggest|greatest|easiest|hardest|only|number one|#1|most important)\\s+\\w+|\\bthe (?:fastest|best|worst|biggest|greatest|only) way to\\b"
+      "match": "^\\s*(?:the\\s+)?(?:fastest|quickest|best|worst|biggest|greatest|easiest|hardest|only|number one|#1|most important)\\s+\\w+|\\bthe (?:fastest|best|worst|biggest|greatest|only) way to\\b",
+      "match_hi": "(?:सबसे|सब से) (?:आसान|तेज़|अच्छा|अच्छी|बड़ा|बड़ी|बुरा|बुरी|ज़रूरी|सस्ता|सस्ती|बेहतर|पक्का)|(?:एकमात्र|इकलौता) (?:तरीका|रास्ता)"
     }
   ],
   "classify_order": [

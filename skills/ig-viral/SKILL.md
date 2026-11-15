@@ -188,3 +188,11 @@ Write the swipe file to `~/.claude/instagram/swipe.md`. `/ig-reel` and
 the pack is working from the user's own evidence instead of from defaults.
 
 Nothing is posted, followed, liked or messaged by this skill. It reads.
+
+## Hindi hooks
+
+`swipe.py` counts Hindi words in a hook and names its formula from `match_hi` in
+`ig-reel/hooks.json` when the hook has Devanagari in it; English hooks are named exactly as
+before. Rows with Hindi carry `"lang"` in the JSON, and their hook scores are uncalibrated (see
+`ig-reel/SKILL.md`). A Hindi hook that matches no formula is a reason to read it by hand, the
+same as an English one.
