@@ -1,0 +1,9 @@
+{
+ "cmd": [
+  "ig-human/detect.py",
+  "url.txt",
+  "--json"
+ ],
+ "exit": 0,
+ "stdout": "{\n  \"source\": \"url.txt\",\n  \"checks\": {\n    \"BURSTINESS\": {\n      \"score\": null,\n      \"detail\": \"n/a: 1 sentence(s), needs 4+ to measure variation\"\n    },\n    \"SPECIFICITY\": {\n      \"score\": null,\n      \"detail\": \"n/a: 21 words, needs 25+ for a density\"\n    },\n    \"SLOP DENSITY\": {\n      \"score\": 100.0,\n      \"detail\": \"0 stock terms, 0.0 per 100 words\"\n    },\n    \"FINGERPRINT\": {\n      \"score\": 100.0,\n      \"detail\": \"0 invisible, 0 em dash, 0 curly quote, 0 ellipsis, 0 hard space\"\n    },\n    \"VOICE\": {\n      \"score\": 100.0,\n      \"detail\": \"short text: structural tells only, 0 found\"\n    }\n  },\n  \"human_score\": null,\n  \"verdict\": \"INCONCLUSIVE\",\n  \"checks_judged\": 3,\n  \"complete\": false\n}\n"
+}

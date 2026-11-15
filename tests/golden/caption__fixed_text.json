@@ -1,0 +1,10 @@
+{
+ "cmd": [
+  "ig-caption/caption.py",
+  "cap_fixed.txt",
+  "--keywords",
+  "client proposals,proposal template"
+ ],
+ "exit": 0,
+ "stdout": "\nCAPTION LINT  ·  305 / 2200 chars  ·  3 hashtags  ·  1 ask(s)\n==============================================================\n\n  WHAT THE FEED SHOWS\n  +------------------------------------------------------+\n  | Comment TEMPLATE and I'll send you the exact         |\n  | proposal template from the reel.                     |\n  |                                                      |\n  | Client proposals used to eat my whole Tuesday.       |\n  +-------------------------------------------- ... more +\n\n  PASS  LENGTH            305 / 2200 characters\n  PASS  FIRST LINE        77 characters, lands whole\n  PASS  HOOK IS CONCRETE  1 number(s) or name(s) in the visible window\n  PASS  HASHTAGS          3 tag(s): #proposals #agencyowner #freelancepricing\n  PASS  TAG PLACEMENT     tags are below the fold\n  PASS  LINKS             no dead links in the body\n  PASS  ONE ASK           one call to action: comment a keyword\n  PASS  KEYWORD ASK       TEMPLATE is one word in capitals, easy to type\n  PASS  EMOJI             0 emoji, 0.0 per 100 characters\n  PASS  SEARCH TERMS      2/2 present, 2 in the visible window\n--------------------------------------------------------------\n  VERDICT  READY\n\n"
+}

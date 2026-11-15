@@ -1,0 +1,9 @@
+{
+ "cmd": [
+  "ig-human/detect.py",
+  "draft.txt",
+  "--json"
+ ],
+ "exit": 0,
+ "stdout": "{\n  \"source\": \"draft.txt\",\n  \"checks\": {\n    \"BURSTINESS\": {\n      \"score\": 100.0,\n      \"detail\": \"variation 0.89 across 12 sentences (want 0.55+)\"\n    },\n    \"SPECIFICITY\": {\n      \"score\": 35.8,\n      \"detail\": \"2 concrete markers, 2.5 per 100 words (want 4+)\"\n    },\n    \"SLOP DENSITY\": {\n      \"score\": 0.0,\n      \"detail\": \"11 stock terms, 13.6 per 100 words (a testament to, crucial, delve, delve into, ...)\"\n    },\n    \"FINGERPRINT\": {\n      \"score\": 0.0,\n      \"detail\": \"1 invisible, 2 em dash, 6 curly quote, 1 ellipsis, 0 hard space\"\n    },\n    \"VOICE\": {\n      \"score\": 7.3,\n      \"detail\": \"0.0 contractions, 2.5 personal pronouns per 100 words, 5 structural tell(s) [the-result, triad, hashtag-wall, follow-bait]\"\n    }\n  },\n  \"human_score\": 17.2,\n  \"verdict\": \"FLAGGED\",\n  \"checks_judged\": 5,\n  \"complete\": true\n}\n"
+}

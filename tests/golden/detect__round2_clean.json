@@ -1,0 +1,9 @@
+{
+ "cmd": [
+  "ig-human/detect.py",
+  "round2_clean.txt",
+  "--json"
+ ],
+ "exit": 0,
+ "stdout": "{\n  \"source\": \"round2_clean.txt\",\n  \"checks\": {\n    \"BURSTINESS\": {\n      \"score\": 95.3,\n      \"detail\": \"variation 0.68 across 9 sentences (want 0.55+)\"\n    },\n    \"SPECIFICITY\": {\n      \"score\": 100.0,\n      \"detail\": \"9 concrete markers, 11.4 per 100 words (want 4+)\"\n    },\n    \"SLOP DENSITY\": {\n      \"score\": 100.0,\n      \"detail\": \"0 stock terms, 0.0 per 100 words\"\n    },\n    \"FINGERPRINT\": {\n      \"score\": 100.0,\n      \"detail\": \"0 invisible, 0 em dash, 0 curly quote, 0 ellipsis, 0 hard space\"\n    },\n    \"VOICE\": {\n      \"score\": 98.0,\n      \"detail\": \"5.1 contractions, 7.6 personal pronouns per 100 words, 0 structural tell(s)\"\n    }\n  },\n  \"human_score\": 97.3,\n  \"verdict\": \"PASS\",\n  \"checks_judged\": 5,\n  \"complete\": true\n}\n"
+}
