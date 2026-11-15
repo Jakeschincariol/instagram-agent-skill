@@ -169,3 +169,22 @@ The scripts read Devanagari. A Hindi word counts as one word, । and ॥ end a 
   carries `"lang"` and `"calibration"` and the text output says so. Tell the user. Until there are
   about 30 real Hindi hooks with known results to calibrate against, use the score to catch
   greetings, preambles and vague hooks, not to rank two decent ones.
+
+## Production package (`package.py`)
+
+When the script is written, turn it into a package the creator can shoot from:
+
+```bash
+python3 package.py spec.json --bank hashtags.json -o package.md
+python3 package.py spec.json --json -o package.json   # for ig-plan/content_calendar.py
+```
+
+The spec holds the hook (spoken and on-screen), one entry per scene (voiceover,
+shot, B-roll, location, on-screen text, transition), the caption, CTA, topics,
+keywords and every factual claim with its source. The package adds the timing
+(from `beats.py`, 150 wpm for Hindi), the hook score, the caption lint, up to five
+hashtags from the bank, a fact-check table and the approval checklist.
+
+It is **NOT READY** while any claim lacks a verified source, a scene has no
+shot, or the caption fails. The creator shoots, records the voiceover, approves
+and publishes; the package only lists those steps as boxes to tick.

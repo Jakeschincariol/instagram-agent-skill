@@ -196,3 +196,49 @@ Nothing is posted, followed, liked or messaged by this skill. It reads.
 before. Rows with Hindi carry `"lang"` in the JSON, and their hook scores are uncalibrated (see
 `ig-reel/SKILL.md`). A Hindi hook that matches no formula is a reason to read it by hand, the
 same as an English one.
+
+## The research archive (`research.py`)
+
+`swipe.py` ranks one batch. `research.py` keeps the evidence between batches, so
+research compounds instead of starting over: the accounts you watch, every post
+you captured, what is trending across them, and which ideas came out of it.
+
+```bash
+R="python3 research.py --data PATH"          # or set IG_RESEARCH_DIR once
+$R init
+$R account add --handle @someone --name "..." --niche "..." --why "..." --priority high
+$R account import accounts.tsv               # the user's list, any length
+$R account list --due 14                     # who has not been researched in 14 days
+$R discover add --handle @new --why "..." --found-via "where you found it"
+$R discover promote @new                     # after the user has checked it is real
+$R post import captured.tsv                  # what was seen, with views_basis per number
+$R account done @someone                     # mark an account researched today
+$R outliers --min 2                          # posts at 2x+ their own account's baseline
+$R trends --days 30                          # emerging formulas, formats, categories, styles
+$R search "home loan" --format carousel
+$R idea add --title "..." --format reel --insights p-0004 --relevance 5 --originality 4 --value 5 --confidence 3 --effort 2
+$R recommend -n 5 --mark
+$R idea status i-0003 scripted               # its insights are marked used
+$R digest --days 7 --save                    # the regular research digest
+```
+
+Rules the archive enforces, so the skill does not have to remember them:
+
+- **No number without a basis.** Every metric is `observed` (read off the post)
+  or `estimate`, and a metric with neither is refused. Estimates are shown and
+  never used to rank.
+- **Outliers are relative.** A post is ranked against its own account's
+  observed baseline (registry `baseline_views` or the median of 3+ archived
+  posts), never on raw views.
+- **Discovery is a queue, not a registry.** Discovered accounts stay
+  `candidate` until someone has checked them on Instagram and promoted them.
+- **Ideas are not repeated.** A near-duplicate idea is refused; ideas close to
+  something already made, or recommended before, sink in the ranking; an
+  insight turned into content is marked used.
+- **It does not fetch Instagram.** Capture happens in the user's own logged-in
+  browser at human pace, or in an authorised browser session. A digest run
+  without new captures says so.
+
+Ranking: relevance 30%, audience value 25%, originality 20%, research
+confidence 15%, ease of production 10%, each scored 1 to 5 by the person
+adding the idea; approved ideas get a small lift.

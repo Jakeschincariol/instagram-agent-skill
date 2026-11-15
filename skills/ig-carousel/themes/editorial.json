@@ -1,0 +1,24 @@
+{
+  "name": "Editorial (generic starter theme)",
+  "note": "A neutral starter. Copy it, change the tokens, and keep your copy in a private folder. Every colour and font a slide uses comes from here.",
+  "size": [1080, 1350],
+  "margin": 96,
+  "colors": {
+    "bg": "#FAFAF7",
+    "ink": "#16181D",
+    "accent": "#2742D6",
+    "muted": "#5B616E",
+    "soft": "#E3E8FB",
+    "highlight": "#B7C4F5"
+  },
+  "fonts": {
+    "display_stack": ["Space Grotesk", "Mukta"],
+    "body_stack": ["Inter", "Mukta"],
+    "google": ["Space Grotesk", "Inter", "Mukta"]
+  },
+  "brand": {"name": "Your Brand", "handle": "@yourhandle", "logo": null},
+  "logo_height": 56,
+  "logo_on": ["cover", "cta"],
+  "orb_on": ["cover", "statement", "cta"],
+  "numbering": {"style": "{n:02d} / {total:02d}"}
+}
