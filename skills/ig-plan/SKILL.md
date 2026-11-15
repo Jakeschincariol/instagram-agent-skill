@@ -98,3 +98,19 @@ Say "write Tuesday" and I will draft it.
 Write the plan to `~/.claude/instagram/plan.md` so the other skills can read
 it. Nothing is scheduled or posted anywhere. This is a plan and the user runs
 it.
+
+## The calendar and approval gates (`content_calendar.py`)
+
+```bash
+C="python3 content_calendar.py --data PATH"    # same folder as ig-viral/research.py
+$C build --start 2026-11-17 --weeks 2 --cadence mon:reel,wed:carousel,fri:reel
+$C attach 2026-11-17 --package package.json   # from ig-reel/package.py --json
+$C approve 2026-11-17 --by "creator"          # records the creator's approval
+$C check --days 7                             # what still blocks this week
+```
+
+Slots fill from the highest-ranked approved ideas (`--include-new` to use new
+ones too); a slot with no fitting idea stays OPEN and says research is needed.
+Each slot passes four gates: idea, package, facts verified, approved. `approve`
+refuses while facts are unverified, and attaching a new package clears an old
+approval. Nothing is ever published by this tool.

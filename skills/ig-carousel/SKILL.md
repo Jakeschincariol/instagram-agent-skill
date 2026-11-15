@@ -101,3 +101,28 @@ Caption: Job B, hook in line 1, one ask, 3 tags.
 ```
 
 Nothing is uploaded. The user posts it.
+
+## Rendering from a design system (`render.py`)
+
+Copy goes in a slides file; the look lives in a theme file. The same slides
+render in any theme, so a brand's identity stays consistent deck after deck.
+
+```bash
+python3 render.py slides.json --theme themes/editorial.json --out out/ --png
+python3 render.py slides.json --check            # checks only
+```
+
+Layouts: `cover`, `statement`, `list`, `steps`, `compare`, `stat`, `myth`,
+`quote`, `visual`, `cta`. A slide names its layout and carries only content.
+
+- A `stat` slide needs a `source`, or the render stops. No source, no stat.
+- A visual is an image file, or a labelled panel holding the prompt or shot
+  description for the image still to be made. Nothing is invented.
+- Text limits per field, item caps per layout and a word cap per slide come
+  from the theme, so "one idea per slide" is checked, not hoped for.
+- Hindi slides need a Devanagari font in the theme's stacks (Mukta, Hind, Noto
+  Sans Devanagari...) and get looser line height for matras.
+- PNGs need node with Playwright; without them the HTML is still complete.
+
+`themes/editorial.json` is a neutral starter. A brand's own theme, logo and
+decks belong in its private folder, not in this repository.
