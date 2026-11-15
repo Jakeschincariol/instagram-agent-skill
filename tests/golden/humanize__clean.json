@@ -1,0 +1,9 @@
+{
+ "cmd": [
+  "ig-human/humanize.py",
+  "clean.txt",
+  "--json"
+ ],
+ "exit": 0,
+ "stdout": "{\n  \"text\": \"Right now, it's important to use the right tools, and that's exactly why I want to look at proposals.\\nIt's not just a template, it's a system. This solid, clean approach is proof of what's possible...\\nThe result? We cut proposal time from 5 hours to 20 minutes.\\nClarity. Speed. Confidence.\\nAnd! Full guide at https://example.com/delve-guide, link in bio.\\n#proposals #agency #freelance #smallbusiness #marketing #viral #fyp\\n\",\n  \"report\": {\n    \"invisible\": [],\n    \"typographic\": [],\n    \"lexical\": [],\n    \"structures\": [\n      {\n        \"name\": \"\\\"It's not just X, it's Y\\\"\",\n        \"count\": 1,\n        \"fix\": \"Say the one thing you actually mean. Delete the setup half.\"\n      },\n      {\n        \"name\": \"Staged rhetorical question (\\\"The result?\\\")\",\n        \"count\": 1,\n        \"fix\": \"Answer it inline instead of staging a reveal.\"\n      },\n      {\n        \"name\": \"Rule-of-three triad\",\n        \"count\": 1,\n        \"fix\": \"Two items or four. Three is the model's default rhythm.\"\n      },\n      {\n        \"name\": \"Hashtag wall (6+)\",\n        \"count\": 1,\n        \"fix\": \"Instagram caps a post at five hashtags. Keep three to five specific topic tags, on their own line at the bottom.\"\n      }\n    ]\n  }\n}\n"
+}

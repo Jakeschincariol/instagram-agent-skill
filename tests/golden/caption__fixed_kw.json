@@ -1,0 +1,11 @@
+{
+ "cmd": [
+  "ig-caption/caption.py",
+  "cap_fixed.txt",
+  "--keywords",
+  "client proposals,proposal template",
+  "--json"
+ ],
+ "exit": 0,
+ "stdout": "{\n  \"characters\": 305,\n  \"limit\": 2200,\n  \"truncate_at\": 125,\n  \"visible\": \"Comment TEMPLATE and I'll send you the exact proposal template from the reel.\\n\\nClient proposals used to eat my whole Tuesday.\",\n  \"truncated\": true,\n  \"first_line_chars\": 77,\n  \"hashtags\": [\n    \"#proposals\",\n    \"#agencyowner\",\n    \"#freelancepricing\"\n  ],\n  \"mentions\": [],\n  \"links\": [],\n  \"emoji\": 0,\n  \"asks\": [\n    \"comment a keyword\"\n  ],\n  \"checks\": [\n    {\n      \"check\": \"LENGTH\",\n      \"status\": \"PASS\",\n      \"detail\": \"305 / 2200 characters\"\n    },\n    {\n      \"check\": \"FIRST LINE\",\n      \"status\": \"PASS\",\n      \"detail\": \"77 characters, lands whole\"\n    },\n    {\n      \"check\": \"HOOK IS CONCRETE\",\n      \"status\": \"PASS\",\n      \"detail\": \"1 number(s) or name(s) in the visible window\"\n    },\n    {\n      \"check\": \"HASHTAGS\",\n      \"status\": \"PASS\",\n      \"detail\": \"3 tag(s): #proposals #agencyowner #freelancepricing\"\n    },\n    {\n      \"check\": \"TAG PLACEMENT\",\n      \"status\": \"PASS\",\n      \"detail\": \"tags are below the fold\"\n    },\n    {\n      \"check\": \"LINKS\",\n      \"status\": \"PASS\",\n      \"detail\": \"no dead links in the body\"\n    },\n    {\n      \"check\": \"ONE ASK\",\n      \"status\": \"PASS\",\n      \"detail\": \"one call to action: comment a keyword\"\n    },\n    {\n      \"check\": \"KEYWORD ASK\",\n      \"status\": \"PASS\",\n      \"detail\": \"TEMPLATE is one word in capitals, easy to type\"\n    },\n    {\n      \"check\": \"EMOJI\",\n      \"status\": \"PASS\",\n      \"detail\": \"0 emoji, 0.0 per 100 characters\"\n    },\n    {\n      \"check\": \"SEARCH TERMS\",\n      \"status\": \"PASS\",\n      \"detail\": \"2/2 present, 2 in the visible window\"\n    }\n  ],\n  \"verdict\": \"READY\"\n}\n"
+}

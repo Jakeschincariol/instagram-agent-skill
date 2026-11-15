@@ -1,0 +1,9 @@
+{
+ "cmd": [
+  "ig-human/detect.py",
+  "story.txt",
+  "--json"
+ ],
+ "exit": 0,
+ "stdout": "{\n  \"source\": \"story.txt\",\n  \"checks\": {\n    \"BURSTINESS\": {\n      \"score\": 76.4,\n      \"detail\": \"variation 0.59 across 8 sentences (want 0.55+)\"\n    },\n    \"SPECIFICITY\": {\n      \"score\": 100.0,\n      \"detail\": \"5 concrete markers, 8.2 per 100 words (want 4+)\"\n    },\n    \"SLOP DENSITY\": {\n      \"score\": 100.0,\n      \"detail\": \"0 stock terms, 0.0 per 100 words\"\n    },\n    \"FINGERPRINT\": {\n      \"score\": 100.0,\n      \"detail\": \"0 invisible, 0 em dash, 0 curly quote, 0 ellipsis, 0 hard space\"\n    },\n    \"VOICE\": {\n      \"score\": 84.1,\n      \"detail\": \"1.6 contractions, 11.5 personal pronouns per 100 words, 0 structural tell(s)\"\n    }\n  },\n  \"human_score\": 85.8,\n  \"verdict\": \"PASS\",\n  \"checks_judged\": 5,\n  \"complete\": true\n}\n"
+}

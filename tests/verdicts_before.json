@@ -1,0 +1,188 @@
+{
+ "comment #3": {
+  "human_score": 72.3,
+  "verdict": "REVIEW",
+  "checks_judged": 4,
+  "complete": false
+ },
+ "comment #2": {
+  "human_score": null,
+  "verdict": "INCONCLUSIVE",
+  "checks_judged": 3,
+  "complete": false
+ },
+ "DM keyword": {
+  "human_score": 65.4,
+  "verdict": "REVIEW",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "DM +4d": {
+  "human_score": null,
+  "verdict": "INCONCLUSIVE",
+  "checks_judged": 3,
+  "complete": false
+ },
+ "DM +10d": {
+  "human_score": 77.0,
+  "verdict": "PASS",
+  "checks_judged": 4,
+  "complete": false
+ },
+ "bio": {
+  "human_score": null,
+  "verdict": "INCONCLUSIVE",
+  "checks_judged": 3,
+  "complete": false
+ },
+ "carousel caption": {
+  "human_score": 72.3,
+  "verdict": "PASS",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "carousel slides": {
+  "human_score": 80.8,
+  "verdict": "PASS",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "story frames": {
+  "human_score": 71.4,
+  "verdict": "REVIEW",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "all replies": {
+  "human_score": 80.3,
+  "verdict": "PASS",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "repurpose source": {
+  "human_score": 74.6,
+  "verdict": "REVIEW",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "H1a 4-of-5 comment": {
+  "human_score": 100.0,
+  "verdict": "PASS",
+  "checks_judged": 4,
+  "complete": false
+ },
+ "run-on 1 sentence": {
+  "human_score": 38.2,
+  "verdict": "FLAGGED",
+  "checks_judged": 4,
+  "complete": false
+ },
+ "draft.txt": {
+  "human_score": 16.8,
+  "verdict": "FLAGGED",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "clean.txt": {
+  "human_score": 64.9,
+  "verdict": "REVIEW",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "clean4.txt": {
+  "human_score": 65.3,
+  "verdict": "REVIEW",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "round2.txt": {
+  "human_score": 97.3,
+  "verdict": "PASS",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "round2_clean.txt": {
+  "human_score": 97.3,
+  "verdict": "PASS",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "script.txt": {
+  "human_score": 87.9,
+  "verdict": "PASS",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "url.txt": {
+  "human_score": 80.8,
+  "verdict": "PASS",
+  "checks_judged": 4,
+  "complete": false
+ },
+ "cap_good.txt": {
+  "human_score": 97.3,
+  "verdict": "PASS",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "cap_fixed.txt": {
+  "human_score": 75.1,
+  "verdict": "PASS",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "cap_bad.txt": {
+  "human_score": 49.2,
+  "verdict": "FLAGGED",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "story.txt": {
+  "human_score": 85.8,
+  "verdict": "PASS",
+  "checks_judged": 5,
+  "complete": true
+ },
+ "reply @sam_builds": {
+  "human_score": null,
+  "verdict": "INCONCLUSIVE",
+  "checks_judged": 3,
+  "complete": false
+ },
+ "reply @kira.design": {
+  "human_score": null,
+  "verdict": "INCONCLUSIVE",
+  "checks_judged": 3,
+  "complete": false
+ },
+ "reply @jo_freelance": {
+  "human_score": null,
+  "verdict": "INCONCLUSIVE",
+  "checks_judged": 3,
+  "complete": false
+ },
+ "reply @mattdoesux": {
+  "human_score": 71.1,
+  "verdict": "REVIEW",
+  "checks_judged": 4,
+  "complete": false
+ },
+ "reply @agencyalex": {
+  "human_score": 60.8,
+  "verdict": "REVIEW",
+  "checks_judged": 4,
+  "complete": false
+ },
+ "reply @lena.studio": {
+  "human_score": null,
+  "verdict": "INCONCLUSIVE",
+  "checks_judged": 3,
+  "complete": false
+ },
+ "reply @tomwrites": {
+  "human_score": null,
+  "verdict": "INCONCLUSIVE",
+  "checks_judged": 3,
+  "complete": false
+ }
+}

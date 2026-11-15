@@ -1,0 +1,9 @@
+{
+ "cmd": [
+  "ig-human/detect.py",
+  "cap_bad.txt",
+  "--json"
+ ],
+ "exit": 0,
+ "stdout": "{\n  \"source\": \"cap_bad.txt\",\n  \"checks\": {\n    \"BURSTINESS\": {\n      \"score\": 100.0,\n      \"detail\": \"variation 0.91 across 5 sentences (want 0.55+)\"\n    },\n    \"SPECIFICITY\": {\n      \"score\": 28.8,\n      \"detail\": \"1 concrete markers, 2.1 per 100 words (want 4+)\"\n    },\n    \"SLOP DENSITY\": {\n      \"score\": 47.9,\n      \"detail\": \"1 stock terms, 2.1 per 100 words (save this for later)\"\n    },\n    \"FINGERPRINT\": {\n      \"score\": 100.0,\n      \"detail\": \"0 invisible, 0 em dash, 0 curly quote, 0 ellipsis, 0 hard space\"\n    },\n    \"VOICE\": {\n      \"score\": 51.8,\n      \"detail\": \"0.0 contractions, 8.3 personal pronouns per 100 words, 2 structural tell(s) [rocket, hashtag-wall]\"\n    }\n  },\n  \"human_score\": 50.9,\n  \"verdict\": \"REVIEW\",\n  \"checks_judged\": 5,\n  \"complete\": true\n}\n"
+}

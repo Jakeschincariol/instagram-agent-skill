@@ -1,0 +1,8 @@
+{
+ "cmd": [
+  "ig-reel/hookscore.py",
+  "readme_hooks.txt"
+ ],
+ "exit": 0,
+ "stdout": "\nHOOK RANKING\n==============================================================================\n->  85.6 STRONG  Nobody tells you that your first 30 reels are supposed to f...\n        weakest: SPECIFICITY (75)\n    81.4 STRONG  I lost $18,000 because of one missing contract.\n        weakest: ADDRESS (70)\n    54.4 OK      Stop scrolling if you want to grow on Instagram in 2026 🔥\n        weakest: STAKES (70)\n        dealbreaker: Opens with \"stop scrolling\". Asking for attention proves you have not earned it.\n        dealbreaker: Emoji in the hook. On-screen text at hook size has room for words or for an emoji, not both.\n     9.6 WEAK    Hey guys, today I wanted to talk about content strategy\n        weakest: FRONTLOAD (0)\n        dealbreaker: Greeting. Nobody came to the feed to be greeted.\n\nShoot the top one. If the top one is under 50, none of these are the hook.\n\n"
+}

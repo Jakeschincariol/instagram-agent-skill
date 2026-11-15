@@ -1,0 +1,9 @@
+{
+ "cmd": [
+  "ig-human/humanize.py",
+  "cap_bad.txt",
+  "--json"
+ ],
+ "exit": 0,
+ "stdout": "{\n  \"text\": \"#agency Hey everyone!! 👋 So I wanted to share something that has honestly been on my mind for a really long time about the way we all write proposals 😅✨🙌\\nLink in bio, and DM me!\\nFull guide: https://example.com/guide\\n#viral #fyp #explorepage #proposals #freelance #smallbusiness #marketing\\n\",\n  \"report\": {\n    \"invisible\": [],\n    \"typographic\": [],\n    \"lexical\": [\n      {\n        \"find\": \"save this for later\",\n        \"replace\": \"(deleted)\",\n        \"count\": 1,\n        \"family\": \"closers\"\n      }\n    ],\n    \"structures\": [\n      {\n        \"name\": \"Rocket / fire / bulb / sparkle / dart emoji\",\n        \"count\": 1,\n        \"fix\": \"One emoji max, and not one of these five.\"\n      },\n      {\n        \"name\": \"Hashtag wall (6+)\",\n        \"count\": 1,\n        \"fix\": \"Instagram caps a post at five hashtags. Keep three to five specific topic tags, on their own line at the bottom.\"\n      }\n    ]\n  }\n}\n"
+}
