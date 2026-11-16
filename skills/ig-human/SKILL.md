@@ -62,12 +62,13 @@ Structural tells get **flagged, not rewritten**, because changing the shape of
 a sentence needs judgement:
 
 - "It's not just X, it's Y" and "not only X but also Y"
-- Rule-of-three triads
-- Rhetorical one-word question lines: "The result?"
+- Rule-of-three triads, "fast, cheap, and easy." and a line of three
+  fragments, "Clarity. Speed. Confidence."
+- Staged rhetorical questions: "The result?", on its own line or mid-paragraph
 - The video preamble: "in this video I'm going to show you"
 - Emoji bullet lists
 - Three or more shouted words in a row
-- Hashtag walls
+- Hashtag walls: six or more. Five is Instagram's cap, so five is allowed
 - Reflex bait: "follow for more", "tag someone who", "double tap if"
 
 That list is your job. Rewrite each flagged line by hand, keeping the meaning,
@@ -90,6 +91,28 @@ The verdict weights the mean at 60% and the **weakest single check** at 40%,
 because one signal is enough. PASS needs an overall of 70+ with no check
 below 55.
 
+**Short text.** Comments, DMs, replies, bios and hooks are too short for some
+checks to measure anything. BURSTINESS needs 4+ sentences and SPECIFICITY needs
+25+ words; below that they show as `n/a` and are left out of the verdict, and
+VOICE is judged on structural tells alone (each one costs half its score,
+because in one line it is most of the text). The output says "judged on 3 of
+5 checks" when that happens. SLOP DENSITY and FINGERPRINT always count, so a
+short draft full of stock words still fails.
+
+**INCONCLUSIVE.** A PASS needs all five checks measured and passed, which
+means 25+ words and 4+ sentences. Links and email addresses are taken out
+before counting, so a URL cannot carry a short draft over the line. If even one
+check cannot be measured, a draft with nothing wrong in what could be measured
+gets `INCONCLUSIVE` and no score: part of the panel is not enough to vouch for
+it. That is the normal result for a comment, a DM, a reply or a bio, and it is
+not a failure. A short draft that does fail a measured check is still REVIEW
+or FLAGGED, with a partial score. `detect.py` exits 0 for PASS, 1 for REVIEW
+or FLAGGED and 3 for INCONCLUSIVE.
+
+Spoken numbers count as concrete: "five hours" scores the same as "5 hours".
+Words inside a URL are not counted as slop, because the humanizer never edits
+inside a link.
+
 ## Say this honestly
 
 These are five local heuristics modelled on the signals public detectors key
@@ -105,7 +128,25 @@ do not tell a user their text is undetectable.
 1. `humanize.py draft.txt -o clean.txt --report`
 2. Read the structural flags. Rewrite those lines yourself.
 3. `detect.py draft.txt clean.txt` to show the before and after.
-4. If the verdict is not PASS, fix the weakest check named in the output and go
-   again. Two rounds is normal. Five means the draft was written by formula,
+4. If the verdict is INCONCLUSIVE, stop here: the draft is too short for the
+   panel. It is done when `humanize.py` strips nothing and flags nothing and it
+   reads right out loud. Do not pad it to get a score.
+   If the verdict is REVIEW or FLAGGED, fix the weakest check named in the
+   output and go again. Two rounds is normal. Five means the draft was written by formula,
    and the fix is a different draft, not more passes.
 5. Show the user the cleaned text and the score. Never the score alone.
+
+## Hindi and mixed drafts
+
+The scripts read Devanagari. A Hindi word counts as one word, । and ॥ end a sentence (so does a `|` typed after a Hindi word), and common spelling variants compare equal: nukta or none (ज़रूरी, जरूरी), candrabindu or anusvara (पाँच, पांच), visarga or none (निःसंदेह, निसंदेह), महत्त्व or महत्व, -ये or -ए endings (गये, गए), यह or ये, and a hyphenated compound (भाग-दौड़, भागदौड़), which counts as one word. Each tool decides whether the text is `en`, `hi` or `mixed` (Hindi and English words together, as most Hinglish is). English output is exactly what it was: no new fields, no new lines.
+
+- `detect.py` counts Hindi words, sentences, pronouns (मैं, हम, आप, तुम...) and number words. Hindi
+  has no contractions, so for `hi` and `mixed` text VOICE is pronouns and structural tells, half
+  each, and says so in its detail. The `hi` group in `slop.json` lists Hindi stock phrases ("आज के
+  इस डिजिटल युग में", "अत्यंत महत्वपूर्ण", "वीडियो को लाइक करें"...) and they count in SLOP DENSITY.
+- `humanize.py` never rewrites Hindi. Hindi stock phrases are reported under structural tells for
+  you to rewrite, because a good Hindi replacement needs a native ear. A zero-width joiner or
+  non-joiner between two Devanagari letters is kept, since it chooses how a conjunct is drawn;
+  anywhere else it is still removed.
+- **Hindi scores are uncalibrated**: the thresholds were set on English. The JSON carries `"lang"`
+  and `"calibration"`. Say so when you show a Hindi score, and read the draft out loud as well.

@@ -102,14 +102,23 @@ python3 -m yt_dlp --skip-download --write-auto-subs --sub-langs "en.*" \
 Take every caption word with a timestamp under 3.0 seconds. That is the hook,
 as said, not as written.
 
+These two commands need `yt-dlp`, the one optional dependency in the pack. It
+is not installed by default; if `python3 -m yt_dlp` says "No module named
+yt_dlp", install it with `pip install yt-dlp`, or skip this step and use what
+you captured by hand. `swipe.py` itself needs nothing beyond Python 3.
+
 ## Step 3: rank it
 
 Fill a tab-separated file with a header row and run the script:
 
 ```
-account	followers	median	views	hook
-@someone	48000	11000	412000	nobody tells you your first 30 reels are supposed to flop
+account	followers	median	views	hook	on-screen	length	cta
+@someone	48000	11000	412000	nobody tells you your first 30 reels are supposed to flop	FIRST 30 FLOP	24	comment FLOP
 ```
+
+`views` and `hook` are required. `on-screen`, `length` (seconds) and `cta` are
+optional; when they are there, the script compares them between the top and
+bottom thirds (median length, which asks, how many had a text card).
 
 ```bash
 python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
@@ -117,7 +126,10 @@ python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
 
 It computes the outlier multiple, names the hook formula using the same 26
 formulas `/ig-reel` writes from, scores each hook with `hookscore.py`, and
-prints what separates the top third from the bottom third.
+prints what separates the top third from the bottom third: hook score, hook
+length, and, from the optional columns, reel length, the ask and the on-screen
+card. Whether the payoff is visual and whether the first frame moves are not in
+the file; read those off the reels yourself.
 
 ## Step 4: say what it means, carefully
 
@@ -176,3 +188,64 @@ Write the swipe file to `~/.claude/instagram/swipe.md`. `/ig-reel` and
 the pack is working from the user's own evidence instead of from defaults.
 
 Nothing is posted, followed, liked or messaged by this skill. It reads.
+
+## Hindi hooks
+
+`swipe.py` counts Hindi words in a hook and names its formula from `match_hi` in
+`ig-reel/hooks.json` when the hook has Devanagari in it; English hooks are named exactly as
+before. Rows with Hindi carry `"lang"` in the JSON, and their hook scores are uncalibrated (see
+`ig-reel/SKILL.md`). A Hindi hook that matches no formula is a reason to read it by hand, the
+same as an English one.
+
+## The research archive (`research.py`)
+
+`swipe.py` ranks one batch. `research.py` keeps the evidence between batches, so
+research compounds instead of starting over: the accounts you watch, every post
+you captured, what is trending across them, and which ideas came out of it.
+
+```bash
+R="python3 research.py --data PATH"          # or set IG_RESEARCH_DIR once
+$R init
+$R account add --handle @someone --name "..." --niche "..." --why "..." --priority high
+$R account import accounts.tsv               # the user's list, any length
+$R account list --due 14                     # who has not been researched in 14 days
+$R discover add --handle @new --why "..." --found-via "where you found it"
+$R discover promote @new                     # after the user has checked it is real
+$R post import captured.tsv                  # what was seen, with views_basis per number
+$R account done @someone                     # mark an account researched today
+$R outliers --min 2                          # posts at 2x+ their own account's baseline
+$R trends --days 30                          # emerging formulas, formats, categories, styles
+$R search "home loan" --format carousel
+$R idea add --title "..." --format reel --insights p-0004 --relevance 5 --originality 4 --value 5 --confidence 3 --effort 2
+$R recommend -n 5 --mark
+$R idea status i-0003 scripted               # its insights are marked used
+$R digest --days 7 --save                    # the regular research digest
+```
+
+Rules the archive enforces, so the skill does not have to remember them:
+
+- **No number without a basis.** Every metric is `observed` (read off the post)
+  or `estimate`, and a metric with neither is refused. Estimates are shown and
+  never used to rank. Counts are kept as the post shows them: `12.4K`,
+  `1.2M` and `1.5 lakh` are parsed (12400, 1200000, 150000) and keep the
+  label as `shown`; anything else is refused, never cut to its digits.
+- **One post, one record.** URLs are stored in one form (no `?igsh=`, `/reel/`
+  for reels), and a post already archived under any URL form is skipped.
+- **Captured fields are kept**, including `caption`, `posted_on` (the date on
+  the post), `slides` (carousels) and `duration_s` (reels). The digest lists
+  the audience questions copied from comments, merged and counted.
+- **Outliers are relative.** A post is ranked against its own account's
+  observed baseline (registry `baseline_views` or the median of 3+ archived
+  posts), never on raw views.
+- **Discovery is a queue, not a registry.** Discovered accounts stay
+  `candidate` until someone has checked them on Instagram and promoted them.
+- **Ideas are not repeated.** A near-duplicate idea is refused; ideas close to
+  something already made, or recommended before, sink in the ranking; an
+  insight turned into content is marked used.
+- **It does not fetch Instagram.** Capture happens in the user's own logged-in
+  browser at human pace, or in an authorised browser session. A digest run
+  without new captures says so.
+
+Ranking: relevance 30%, audience value 25%, originality 20%, research
+confidence 15%, ease of production 10%, each scored 1 to 5 by the person
+adding the idea; approved ideas get a small lift.

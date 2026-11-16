@@ -52,11 +52,24 @@ The most common DM in this pack and the easiest to ruin. They commented one
 word. They are expecting the thing. So:
 
 ```
-{their name}, here it is: {the thing, or the link}.
+{their name}, here it is: {the thing, or the link}
 
-{one line on how to use it}
+{where to start, in a few words}. {why that part first, in one longer sentence: to them, with one real detail}
 
-{one question they can answer in four words}
+{a question they can answer in four words}
+```
+
+The rhythm is short, long, short. Three lines of the same length read like a
+form letter, and `/ig-human` will flag them for it. Write the long sentence to
+them, the way you would type it: "you", contractions, and one detail that is
+true, a number, a page, a step. Nothing goes in to make it longer.
+
+```
+Sam, here it is: https://dana.studio/template
+
+Start on page one. Those six questions are the ones your clients ask before they sign, and once you've answered them the rest of the proposal takes about 20 minutes.
+
+What are you quoting this week?
 ```
 
 Send the thing **first**, in message one, with no gate. A keyword post that

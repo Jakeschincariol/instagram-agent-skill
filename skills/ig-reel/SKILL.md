@@ -22,6 +22,9 @@ python3 hookscore.py --hook "one line"      # score a single one
 python3 beats.py script.txt --target 30     # timed beat sheet before you shoot
 ```
 
+`hookscore.py` exits 1 when the best hook is under 70. That is the verdict,
+not a crash: the ranking it printed is valid.
+
 ## Before you write
 
 1. Read `~/.claude/instagram/voice.md` if it exists. That is the user's voice
@@ -135,13 +138,53 @@ Write it separately, every time. It is read before it is heard.
 
 ```
 HOOKS  (scored)
-  86  STRONG  #5  Time Collapse   "Proposals used to take me five hours. Twenty minutes now."
+  79  STRONG  #5  Time Collapse   "Proposals used to cost me five hours. Now it's twenty minutes."
                                   on screen: 5 HOURS -> 20 MIN
-  71  STRONG  #1  Cost Confession "I billed four hours a week for formatting. For two years."
+  55  OK      #1  Cost Confession "I billed four hours a week for formatting. For two years."
                                   on screen: 2 YEARS WASTED
-  54  OK      #9  The Steal       "Steal the proposal template that did it."
+  37  WEAK    #9  The Steal       "Steal the proposal template that did it."
                                   on screen: STEAL THIS
 
 Shooting #5: the ratio is believable, it reads in one glance on screen,
-and the number is yours.
+and the number is yours. The first draft, "Proposals used to take me five
+hours. Twenty minutes now.", scored 51: nothing in it was at stake. "Cost"
+fixed that. #9 has no number and no name in it, so it is a closing line,
+not a hook.
 ```
+
+These are real `hookscore.py` scores. Re-run them if you change the scorer.
+
+## Hindi and mixed scripts
+
+The scripts read Devanagari. A Hindi word counts as one word, । and ॥ end a sentence (so does a `|` typed after a Hindi word), and common spelling variants compare equal: nukta or none (ज़रूरी, जरूरी), candrabindu or anusvara (पाँच, पांच), visarga or none (निःसंदेह, निसंदेह), महत्त्व or महत्व, -ये or -ए endings (गये, गए), यह or ये, and a hyphenated compound (भाग-दौड़, भागदौड़), which counts as one word. Each tool decides whether the text is `en`, `hi` or `mixed` (Hindi and English words together, as most Hinglish is). English output is exactly what it was: no new fields, no new lines.
+
+- `hookscore.py` knows Hindi stakes (नहीं, मत, गलती, नुकसान, रुकिए...), Hindi numbers and money
+  words (पाँच, हज़ार, लाख, करोड़, रुपये), Hindi weak openers (नमस्ते, दोस्तों, तो, आज...), the Hindi
+  greeting and video preamble ("आज के इस वीडियो में") as dealbreakers, and that a Hindi command
+  usually comes last ("...protein shake मत लीजिए").
+- `beats.py` times Hindi and mixed scripts at 150 wpm unless you pass `--wpm`, because Hindi read
+  aloud runs slower per word than English.
+- `hooks.json`: 25 of the 26 formulas carry `match_hi`, the same shape in conversational Hindi.
+- **Hindi hook scores are uncalibrated.** The thresholds were set on English hooks, so the JSON
+  carries `"lang"` and `"calibration"` and the text output says so. Tell the user. Until there are
+  about 30 real Hindi hooks with known results to calibrate against, use the score to catch
+  greetings, preambles and vague hooks, not to rank two decent ones.
+
+## Production package (`package.py`)
+
+When the script is written, turn it into a package the creator can shoot from:
+
+```bash
+python3 package.py spec.json --bank hashtags.json -o package.md
+python3 package.py spec.json --json -o package.json   # for ig-plan/content_calendar.py
+```
+
+The spec holds the hook (spoken and on-screen), one entry per scene (voiceover,
+shot, B-roll, location, on-screen text, transition), the caption, CTA, topics,
+keywords and every factual claim with its source. The package adds the timing
+(from `beats.py`, 150 wpm for Hindi), the hook score, the caption lint, up to five
+hashtags from the bank, a fact-check table and the approval checklist.
+
+It is **NOT READY** while any claim lacks a verified source, a scene has no
+shot, or the caption fails. The creator shoots, records the voiceover, approves
+and publishes; the package only lists those steps as boxes to tick.

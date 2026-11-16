@@ -1,0 +1,10 @@
+{
+ "cmd": [
+  "ig-reel/beats.py",
+  "script.txt",
+  "--target",
+  "30"
+ ],
+ "exit": 0,
+ "stdout": "\nBEAT SHEET  ·  88 words  ·  ~32.0s at 165 wpm  ·  target 30.0s\n========================================================================\n  0:00.0   2.5s  HOOK    Proposals used to take me five hours.\n  0:02.5   1.4s          Now it's twenty minutes.\n  0:04.0   1.1s          Here's what changed.\n  0:05.1  14.2s  MID     I stopped writing them from scratch every single time a new client asked for a quote, and I built one template in Google Docs that answers the same six questions every buyer asks before they sign anything at all.\n                         ^ 14.2s on one beat\n  0:19.3   1.1s          Scope. Timeline. Price.\n  0:20.4   1.1s          What's not included.\n  0:21.4   2.2s          What happens if it runs late.\n  0:23.6   1.1s          How they pay.\n  0:24.7   3.3s          Last month that template closed 4 of 5 proposals.\n  0:28.0   2.2s          Comment TEMPLATE and I'll send it.\n  0:30.2   1.8s  CTA     Five hours to twenty minutes.\n------------------------------------------------------------------------\n  - Beat(s) 4 run past 4s. Either split the line or change what is on screen inside it. A static frame is where people leave.\n  - Beats 6-8 have nothing concrete in them. Put a number, a name or a price in one of them.\n  - Loops: the last beat repeats \"five, hours\" from the hook. Second watches are free reach.\n  - Length is on target (32.0s against 30.0s).\n\n"
+}

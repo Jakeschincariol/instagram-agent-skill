@@ -1,0 +1,9 @@
+{
+ "cmd": [
+  "ig-human/detect.py",
+  "draft.txt",
+  "round2_clean.txt"
+ ],
+ "exit": 0,
+ "stdout": "\nAI DETECTION PANEL  -  draft.txt\n==============================================================\n  BURSTINESS    ######################## 100.0\n                variation 0.89 across 12 sentences (want 0.55+)\n  SPECIFICITY   #########...............  35.8\n                2 concrete markers, 2.5 per 100 words (want 4+)\n  SLOP DENSITY  ........................   0.0\n                11 stock terms, 13.6 per 100 words (a testament to, crucial, delve, delve into, ...)\n  FINGERPRINT   ........................   0.0\n                1 invisible, 2 em dash, 6 curly quote, 1 ellipsis, 0 hard space\n  VOICE         ##......................   7.3\n                0.0 contractions, 2.5 personal pronouns per 100 words, 5 structural tell(s) [the-result, triad, hashtag-wall, follow-bait]\n--------------------------------------------------------------\n  HUMAN SCORE   ####....................  17.2   FLAGGED\n\n  Weakest signal: SLOP DENSITY. Fix that first.\n\n\nAI DETECTION PANEL  -  round2_clean.txt\n==============================================================\n  BURSTINESS    #######################.  95.3\n                variation 0.68 across 9 sentences (want 0.55+)\n  SPECIFICITY   ######################## 100.0\n                9 concrete markers, 11.4 per 100 words (want 4+)\n  SLOP DENSITY  ######################## 100.0\n                0 stock terms, 0.0 per 100 words\n  FINGERPRINT   ######################## 100.0\n                0 invisible, 0 em dash, 0 curly quote, 0 ellipsis, 0 hard space\n  VOICE         ########################  98.0\n                5.1 contractions, 7.6 personal pronouns per 100 words, 0 structural tell(s)\n--------------------------------------------------------------\n  HUMAN SCORE   #######################.  97.3   PASS\n\n  17.2 FLAGGED  ->  97.3 PASS   (+80.1)\n\n"
+}
