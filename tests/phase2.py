@@ -478,6 +478,19 @@ def _(a):
         rc, _, err = a.c("attach", "2026-11-16", "--package", pkg(d, "q.json", claims=[{"claim": "x", "status": "needs-check"}]),
                          "--no-claims", "none")
         assert rc == 1 and "lists claims" in err, err
+        rc, _, err = a.c("attach", "2026-11-16", "--package", pkg(d, "k.json", Claims=[{"claim": "x"}]),
+                         "--no-claims", "none")                       # a misspelt key is not "no claims"
+        assert rc == 1 and "lists claims under" in err, err
+        for bad in ({"claims": "x"}, {"claims": {"a": 1}}, {"claims": ["x"]}):
+            rc, _, err = a.c("attach", "2026-11-16", "--package", pkg(d, "bad.json", **bad))
+            assert rc == 1 and "must be a list of objects" in err and "Traceback" not in err, (bad, err)
+        json.dump([], open(os.path.join(d, "list.json"), "w"))
+        rc, _, err = a.c("attach", "2026-11-16", "--package", os.path.join(d, "list.json"))
+        assert rc == 1 and "expected a JSON object" in err, err
+        rc, out, _ = a.c("attach", "2026-11-16", "--package", pkg(d, "v.json", claims=[{"claim": "x", "source": "s", "status": "verified"}]))
+        open(os.path.join(d, "v.json"), "w").write("{bad")                  # corrupted after attach
+        rc, _, err = a.c("approve", "2026-11-16", "--by", "c")
+        assert rc == 1 and "not valid JSON" in err, err
         # a slot attached by the old code (facts_ok true, empty package): approve re-reads the package
         p = pkg(d, "old.json", title="old")
         cal = json.load(open(os.path.join(a.dir, "calendar.json")))

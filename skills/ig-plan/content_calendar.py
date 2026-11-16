@@ -134,9 +134,17 @@ def package_file(store, s):
 
 def read_package(path):
     try:
-        return json.load(open(path, encoding="utf-8"))
+        p = json.load(open(path, encoding="utf-8"))
     except json.JSONDecodeError:
-        raise Refused("attach the JSON package: ig-reel/package.py spec.json --json -o package.json")
+        raise Refused(f"{path} is not valid JSON. Attach the JSON package: "
+                      "ig-reel/package.py spec.json --json -o package.json")
+    if not isinstance(p, dict):
+        raise Refused(f"{path} is not a package (expected a JSON object)")
+    claims = p.get("claims")
+    if claims is not None and not (isinstance(claims, list) and all(isinstance(c, dict) for c in claims)):
+        raise Refused(f"{path}: claims must be a list of objects like "
+                      '{"claim": "...", "source": "...", "status": "verified"}')
+    return p
 
 
 def facts_state(p, no_claims=None):
@@ -159,8 +167,10 @@ def attach(store, date, package, no_claims=None):
         raise Refused(f"{package} does not exist")
     p = read_package(package)
     no_claims = (no_claims or "").strip() or None
-    if no_claims and p.get("claims"):
-        raise Refused("--no-claims was given but the package lists claims: verify them instead")
+    if no_claims and any(p[k] for k in p if "claim" in k.lower()):
+        raise Refused("--no-claims was given but the package lists claims"
+                      + ("" if p.get("claims") else f" under {', '.join(k for k in p if 'claim' in k.lower() and p[k])!r}")
+                      + ": verify them instead")
     s["package"] = portable(store, package)
     s["facts_ok"], problem = facts_state(p, no_claims)
     s["ready"] = bool(p.get("ready", s["facts_ok"])) and s["facts_ok"]
