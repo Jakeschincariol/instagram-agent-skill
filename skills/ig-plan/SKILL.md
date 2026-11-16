@@ -113,4 +113,9 @@ Slots fill from the highest-ranked approved ideas (`--include-new` to use new
 ones too); a slot with no fitting idea stays OPEN and says research is needed.
 Each slot passes four gates: idea, package, facts verified, approved. `approve`
 refuses while facts are unverified, and attaching a new package clears an old
-approval. Nothing is ever published by this tool.
+approval. A package with no claims list, or an empty one, does not pass the
+facts gate: list every rate, rule or number it states, or attach it with
+`--no-claims "why there are none"` so the reason is on record. `approve` re-reads
+the package instead of trusting the flag stored at attach time. Package paths are
+stored relative to the data folder, so the calendar works in any checkout.
+Nothing is ever published by this tool.

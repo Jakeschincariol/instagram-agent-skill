@@ -415,6 +415,163 @@ def _():
         assert not os.path.exists(os.path.join(SK, d, "__pycache__")), d
 
 
+
+# ======================================================================
+# fixes found while running the archive on real workflows (K1-K7)
+# ======================================================================
+def pkg(d, name, **body):
+    p = os.path.join(d, name)
+    json.dump(body, open(p, "w", encoding="utf-8"), ensure_ascii=False)
+    return p
+
+
+def one_slot(a):
+    idea(a, "Gym fees, read first")
+    a.r("idea", "status", "i-0001", "approved")
+    a.c("build", "--start", "2026-11-16", "--cadence", "mon:reel")
+
+
+@test("P16", "calendar (K1): package paths are stored relative to the data folder and survive a move")
+def _():
+    a = Archive()
+    moved = tempfile.mkdtemp(prefix="ig_moved_")
+    try:
+        one_slot(a)
+        os.makedirs(os.path.join(a.dir, "content"))
+        ok = pkg(os.path.join(a.dir, "content"), "pkg.json", claims=[{"claim": "x", "source": "label", "status": "verified"}])
+        rc, out, err = a.c("attach", "2026-11-16", "--package", ok)
+        assert rc == 0, err
+        stored = json.load(open(os.path.join(a.dir, "calendar.json")))["slots"][0]["package"]
+        assert stored == "content/pkg.json", stored                       # no machine-specific path
+        shutil.rmtree(moved); shutil.copytree(a.dir, moved)              # another checkout
+        rc, out, err = run("ig-plan/content_calendar.py", "--data", moved, "--today", DAY, "approve", "2026-11-16", "--by", "c")
+        assert rc == 0, err
+        # an old calendar with an absolute path that is not on this machine: reported, not approved
+        cal = json.load(open(os.path.join(a.dir, "calendar.json")))
+        cal["slots"][0].update(package="/nowhere/old-checkout/pkg.json", approval=None)
+        json.dump(cal, open(os.path.join(a.dir, "calendar.json"), "w"))
+        rc, out, _ = a.c("check")
+        assert rc == 1 and "package file not found here" in out, out
+        rc, _, err = a.c("approve", "2026-11-16", "--by", "c")
+        assert rc == 1 and "not on this machine" in err, err
+    finally:
+        a.close(); shutil.rmtree(moved, ignore_errors=True)
+
+
+@test("P17", "calendar (K2): a missing or empty claims list never passes the facts gate")
+@with_archive
+def _(a):
+    one_slot(a)
+    d = tempfile.mkdtemp()
+    try:
+        for body in ({"title": "no claims key"}, {"title": "empty", "claims": []}):
+            rc, out, _ = a.c("attach", "2026-11-16", "--package", pkg(d, "p.json", **body))
+            assert rc == 0 and "NOT verified" in out and "no claims listed" in out, out
+            rc, _, err = a.c("approve", "2026-11-16", "--by", "c")
+            assert rc == 1 and "facts not done" in err, err
+        # an explicit, recorded reason is the only way through without claims
+        rc, out, _ = a.c("attach", "2026-11-16", "--package", pkg(d, "p.json", claims=[]),
+                         "--no-claims", "a gym tour; states no rate, rule or number")
+        assert rc == 0 and "facts verified (no claims: a gym tour" in out, out
+        rc, out, err = a.c("approve", "2026-11-16", "--by", "c")
+        assert rc == 0, err
+        rc, _, err = a.c("attach", "2026-11-16", "--package", pkg(d, "q.json", claims=[{"claim": "x", "status": "needs-check"}]),
+                         "--no-claims", "none")
+        assert rc == 1 and "lists claims" in err, err
+        # a slot attached by the old code (facts_ok true, empty package): approve re-reads the package
+        p = pkg(d, "old.json", title="old")
+        cal = json.load(open(os.path.join(a.dir, "calendar.json")))
+        cal["slots"][0].update(package=p, facts_ok=True, approval=None)
+        cal["slots"][0].pop("no_claims", None)
+        json.dump(cal, open(os.path.join(a.dir, "calendar.json"), "w"))
+        rc, _, err = a.c("approve", "2026-11-16", "--by", "c")
+        assert rc == 1 and "no claims listed" in err, err
+        assert json.load(open(os.path.join(a.dir, "calendar.json")))["slots"][0]["facts_ok"] is False
+    finally:
+        shutil.rmtree(d)
+
+
+@test("P18", "posts (K4): caption, post date, slide count and duration are kept")
+@with_archive
+def _(a):
+    rc, _, err = a.post(handle="@x", url="https://www.instagram.com/p/C1/", format="carousel", hook="5 labels",
+                        caption="Shake लेने से पहले label पढ़िए।\nSave कीजिए।", posted_on="2026-11-10", slides="8")
+    assert rc == 0, err
+    rc, _, err = a.post(handle="@x", url="https://www.instagram.com/reel/R1/", hook="Stop", duration_s="42s")
+    assert rc == 0, err
+    c, r = a.load("posts.jsonl")
+    assert c["caption"].startswith("Shake लेने") and c["posted_on"] == "2026-11-10" and c["slides"] == 8, c
+    assert r["duration_s"] == 42 and "slides" not in r and "posted_on" not in r, r
+    rc, out, _ = a.r("search", "Save")
+    assert "p-0001" in out, out                                       # caption is searchable
+    for bad in ({"posted_on": "10/11/2026"}, {"slides": "0"}, {"slides": "eight"}, {"duration_s": "0:42"}):
+        rc, _, err = a.post(handle="@x", url="https://www.instagram.com/p/BAD/", hook="h", **bad)
+        assert rc == 1, (bad, err)
+    assert len(a.load("posts.jsonl")) == 2
+
+
+@test("P19", "posts (K5): one post under different URLs is stored once")
+@with_archive
+def _(a):
+    rc, out, _ = a.post(handle="@x", url="https://www.instagram.com/reel/AbC_1-x/?igsh=MTd2", hook="h")
+    assert rc == 0 and json.loads(open(os.path.join(a.dir, "posts.jsonl")).readline())["url"] == \
+        "https://www.instagram.com/reel/AbC_1-x/", out
+    for u in ("https://instagram.com/reel/AbC_1-x", "https://www.instagram.com/reels/AbC_1-x/",
+              "https://m.instagram.com/reel/AbC_1-x/?utm_source=ig_web_copy_link", "https://www.instagram.com/p/AbC_1-x/",
+              "https://www.instagram.com/someuser/reel/AbC_1-x/", " https://www.instagram.com/reel/AbC_1-x/ "):
+        rc, out, _ = a.post(handle="@x", url=u, hook="h")
+        assert rc == 0 and "skipped 1 already archived" in out, (u, out)
+    rc, out, _ = a.post(handle="@x", url="https://www.instagram.com/reel/AbC_1-y/", hook="h")   # a different post
+    assert "added 1" in out, out
+    tsv = os.path.join(a.dir, "dup.tsv")                             # duplicates inside one import file
+    open(tsv, "w").write("handle\turl\tformat\thook\n@x\thttps://www.instagram.com/p/Z9/\tcarousel\th\n"
+                         "@x\thttps://www.instagram.com/p/Z9/?img_index=2\tcarousel\th\n")
+    rc, out, _ = a.r("post", "import", tsv)
+    assert "added 1" in out and "skipped 1" in out, out
+    assert len(a.load("posts.jsonl")) == 3
+
+
+@test("P20", "posts (K6): abbreviated counts are parsed, labelled and never cut to their digits")
+@with_archive
+def _(a):
+    cases = [("12.4K", 12400, "12.4K"), ("1.2M", 1200000, "1.2M"), ("1.5 lakh", 150000, "1.5 lakh"),
+             ("2 लाख", 200000, "2 लाख"), ("1,20,000", 120000, None), ("12,400", 12400, None), ("950", 950, None)]
+    for i, (shown, value, label) in enumerate(cases):
+        rc, _, err = a.post(handle="@x", url=f"https://www.instagram.com/reel/K{i}/", hook="h",
+                            views=shown, views_basis="observed")
+        assert rc == 0, (shown, err)
+        m = a.load("posts.jsonl")[-1]["metrics"]["views"]
+        assert m["value"] == value and m.get("shown") == label, (shown, m)
+    for bad in ("12.4", "12.4X", "1.2.3K", "K"):
+        rc, _, err = a.post(handle="@x", url="https://www.instagram.com/reel/BAD/", hook="h", views=bad, views_basis="observed")
+        assert rc == 1 and ("not a number" in err or "unknown unit" in err or "no unit" in err), (bad, err)
+    assert len(a.load("posts.jsonl")) == len(cases)
+    a.r("account", "add", "--handle", "@y", "--baseline-views", "12.4K", "--baseline-basis", "observed")
+    _, out, _ = a.r("account", "list", "--json")
+    assert any(r["handle"] == "@y" and r["baseline_views"] == "12400" for r in json.loads(out)), out
+
+
+@test("P21", "digest (K7): audience questions from the window, merged and counted")
+@with_archive
+def _(a):
+    a.post(handle="@x", url="https://www.instagram.com/reel/Q1/", hook="h", observed_on="2026-11-14",
+           audience_questions="Whey कब लेना चाहिए?|Sugar कितनी है?")
+    a.post(handle="@x", url="https://www.instagram.com/reel/Q2/", hook="h", observed_on="2026-11-13",
+           audience_questions="whey कब  लेना चाहिए|Price कितना है?")
+    a.post(handle="@x", url="https://www.instagram.com/reel/Q3/", hook="h", observed_on="2026-10-01",
+           audience_questions="Old question outside the window?")
+    _, out, _ = a.r("digest", "--days", "7")
+    sec = out.split("## Audience questions")[1].split("\n## ")[0]
+    lines = [l for l in sec.splitlines() if l.startswith("- ")]
+    assert lines[0].startswith('- "Whey कब लेना चाहिए?" (asked on 2 posts): p-0001, p-0002'), sec
+    assert len(lines) == 3 and "Old question" not in sec, sec
+    empty = Archive()
+    try:
+        _, out, _ = empty.r("digest")
+        assert "## Audience questions" in out and "none captured in this window" in out, out
+    finally:
+        empty.close()
+
 if __name__ == "__main__":
     only = sys.argv[1:]
     passed = failed = 0

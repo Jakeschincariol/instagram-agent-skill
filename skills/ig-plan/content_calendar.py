@@ -11,7 +11,9 @@ shot, scripted), then with the ideas the research engine ranks highest
   idea      an idea is assigned
   package   a production package is attached (ig-reel/package.py --json, or a
             carousel slides file that passes ig-carousel/render.py --check)
-  facts     every claim in the package is verified with a source
+  facts     every claim in the package is verified with a source. A package with no
+            claims list (or an empty one) does not pass, unless whoever attaches it
+            states why it makes no factual claims: attach --no-claims "reason"
   approved  the creator approved it, recorded by hand with `approve`
 
 The calendar never publishes and never approves on its own. `approve` only
@@ -20,12 +22,13 @@ records an approval the creator gives, and refuses while facts are unverified.
 Usage
   content_calendar.py build --start 2026-11-17 --weeks 2 --cadence mon:reel,wed:carousel,fri:reel
   content_calendar.py show [--json]
-  content_calendar.py attach 2026-11-17 --package package.json
+  content_calendar.py attach 2026-11-17 --package package.json [--no-claims "reason"]
   content_calendar.py approve 2026-11-17 --by "creator name"
   content_calendar.py check [--days 7]
 
 Data: the same folder as research.py (--data, $IG_RESEARCH_DIR or
-~/.claude/instagram/research), in calendar.json.
+~/.claude/instagram/research), in calendar.json. Package paths are stored relative
+to that folder, so the calendar still works in another checkout or on another machine.
 Exit status: 0 ok, 1 a gate is open (check) or a refusal, 2 bad usage.
 """
 
@@ -112,20 +115,62 @@ def find(cal, date):
     return s
 
 
-def attach(store, date, package):
+def portable(store, package):
+    """The package path as stored: relative to the data folder, so the calendar keeps
+    working in another checkout. Falls back to absolute only when no relative path
+    exists (a different drive on Windows)."""
+    full = os.path.abspath(package)
+    try:
+        return os.path.relpath(full, os.path.abspath(store.root)).replace(os.sep, "/")
+    except ValueError:
+        return full
+
+
+def package_file(store, s):
+    """Where a slot's package is on this machine (old calendars stored absolute paths)."""
+    p = s.get("package") or ""
+    return p if not p or os.path.isabs(p) else os.path.normpath(os.path.join(store.root, p))
+
+
+def read_package(path):
+    try:
+        return json.load(open(path, encoding="utf-8"))
+    except json.JSONDecodeError:
+        raise Refused("attach the JSON package: ig-reel/package.py spec.json --json -o package.json")
+
+
+def facts_state(p, no_claims=None):
+    """(facts_ok, problem). An absent or empty claims list is not "all verified": the
+    package has to list its claims, or someone has to say why there are none."""
+    claims = p.get("claims")
+    if not claims:
+        if no_claims:
+            return True, None
+        return False, ("no claims listed: list every rate, rule or number the content states, "
+                       "or attach with --no-claims \"why there are none\"")
+    unverified = [c for c in claims if not (c.get("status") == "verified" and c.get("source"))]
+    return not unverified, (f"{len(unverified)} claim(s) not verified with a source" if unverified else None)
+
+
+def attach(store, date, package, no_claims=None):
     cal = load(store)
     s = find(cal, date)
     if not os.path.exists(package):
         raise Refused(f"{package} does not exist")
-    try:
-        p = json.load(open(package, encoding="utf-8"))
-    except json.JSONDecodeError:
-        raise Refused("attach the JSON package: ig-reel/package.py spec.json --json -o package.json")
-    claims = p.get("claims", [])
-    s["package"] = os.path.abspath(package)
-    s["facts_ok"] = all(c.get("status") == "verified" and c.get("source") for c in claims)
-    s["ready"] = bool(p.get("ready", s["facts_ok"]))
-    s["problems"] = p.get("problems", [])
+    p = read_package(package)
+    no_claims = (no_claims or "").strip() or None
+    if no_claims and p.get("claims"):
+        raise Refused("--no-claims was given but the package lists claims: verify them instead")
+    s["package"] = portable(store, package)
+    s["facts_ok"], problem = facts_state(p, no_claims)
+    s["ready"] = bool(p.get("ready", s["facts_ok"])) and s["facts_ok"]
+    s["problems"] = list(p.get("problems", []))
+    if problem and not any(problem in x or x in problem for x in s["problems"]):
+        s["problems"].append(problem)
+    if no_claims:
+        s["no_claims"] = no_claims
+    else:
+        s.pop("no_claims", None)
     s["approval"] = None                     # a new package needs a new approval
     save(store, cal)
     return s
@@ -141,6 +186,17 @@ def approve(store, date, by, on=None):
     s = find(cal, date)
     g = gates(s)
     missing = [k for k in ("idea", "package", "facts") if not g[k]]
+    if not missing:
+        # check the package itself again, not just the flag stored when it was attached
+        f = package_file(store, s)
+        if not os.path.exists(f):
+            raise Refused(f"{date} cannot be approved: its package {s['package']} is not on this machine. "
+                          "Attach it again")
+        ok, problem = facts_state(read_package(f), s.get("no_claims"))
+        if not ok:
+            s["facts_ok"] = False
+            save(store, cal)
+            raise Refused(f"{date} cannot be approved yet: facts not done ({problem})")
     if missing:
         raise Refused(f"{date} cannot be approved yet: {', '.join(missing)} not done")
     if not by.strip():
@@ -177,6 +233,7 @@ def main(argv=None):
     at = sub.add_parser("attach")
     at.add_argument("date")
     at.add_argument("--package", required=True)
+    at.add_argument("--no-claims", metavar="REASON", help="the package states no rate, rule or number; say why")
     apv = sub.add_parser("approve")
     apv.add_argument("date")
     apv.add_argument("--by", required=True)
@@ -192,8 +249,10 @@ def main(argv=None):
             cal = load(store)
             print(json.dumps(cal, indent=2, ensure_ascii=False) if args.json else render(cal, store.ideas()))
         elif args.cmd == "attach":
-            s = attach(store, args.date, args.package)
-            print(f"{s['date']}: package attached, facts {'verified' if s['facts_ok'] else 'NOT verified'}")
+            s = attach(store, args.date, args.package, args.no_claims)
+            print(f"{s['date']}: package attached, facts {'verified' if s['facts_ok'] else 'NOT verified'}"
+                  + (f" (no claims: {s['no_claims']})" if s.get("no_claims") else "")
+                  + "".join(f"\n  - {x}" for x in s["problems"]))
         elif args.cmd == "approve":
             s = approve(store, args.date, args.by, args.today)
             print(f"{s['date']}: approval recorded ({s['approval']['by']}, {s['approval']['on']}). "
@@ -205,9 +264,12 @@ def main(argv=None):
             for s in load(store)["slots"]:
                 if ref.isoformat() <= s["date"] <= horizon:
                     missing = [g for g, ok in gates(s).items() if not ok]
-                    if missing:
+                    f = package_file(store, s)
+                    lost = f and not os.path.exists(f)
+                    if missing or lost:
                         open_.append(s)
-                        print(f"{s['date']} {s['format']:<8} {s['idea_id'] or 'OPEN':<7} waiting on: {', '.join(missing)}")
+                        print(f"{s['date']} {s['format']:<8} {s['idea_id'] or 'OPEN':<7} waiting on: "
+                              + ", ".join(missing + (["package file not found here: attach it again"] if lost else [])))
             print(f"{len(open_)} slot(s) in the next {args.days} days are not ready to publish")
             return 1 if open_ else 0
     except (Refused, research.Refused) as e:

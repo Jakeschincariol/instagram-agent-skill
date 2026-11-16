@@ -226,7 +226,14 @@ Rules the archive enforces, so the skill does not have to remember them:
 
 - **No number without a basis.** Every metric is `observed` (read off the post)
   or `estimate`, and a metric with neither is refused. Estimates are shown and
-  never used to rank.
+  never used to rank. Counts are kept as the post shows them: `12.4K`,
+  `1.2M` and `1.5 lakh` are parsed (12400, 1200000, 150000) and keep the
+  label as `shown`; anything else is refused, never cut to its digits.
+- **One post, one record.** URLs are stored in one form (no `?igsh=`, `/reel/`
+  for reels), and a post already archived under any URL form is skipped.
+- **Captured fields are kept**, including `caption`, `posted_on` (the date on
+  the post), `slides` (carousels) and `duration_s` (reels). The digest lists
+  the audience questions copied from comments, merged and counted.
 - **Outliers are relative.** A post is ranked against its own account's
   observed baseline (registry `baseline_views` or the median of 3+ archived
   posts), never on raw views.

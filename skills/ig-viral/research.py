@@ -99,6 +99,53 @@ def norm_handle(h):
     return "@" + h
 
 
+POST_URL = re.compile(r"^https?://(?:www\.|m\.)?instagram\.com/(?:[A-Za-z0-9._]+/)?(reels?|p|tv)/([A-Za-z0-9_-]+)", re.I)
+
+
+def canonical_url(url):
+    """One URL per post: ?igsh= and other query strings, /reels/ vs /reel/, m. or no www,
+    and a username prefix all point at the same post. Non-Instagram URLs are only trimmed."""
+    url = (url or "").strip()
+    m = POST_URL.match(url)
+    if not m:
+        return url
+    kind = "reel" if m.group(1).lower().startswith("reel") else ("tv" if m.group(1).lower() == "tv" else "p")
+    return f"https://www.instagram.com/{kind}/{m.group(2)}/"
+
+
+def post_key(url):
+    """What makes two URLs the same post: the shortcode, whatever the path kind."""
+    m = POST_URL.match((url or "").strip())
+    return ("ig", m.group(2)) if m else ("url", canonical_url(url))
+
+
+SCALE = {"k": 10**3, "thousand": 10**3, "हज़ार": 10**3, "हजार": 10**3,
+         "m": 10**6, "mn": 10**6, "million": 10**6,
+         "l": 10**5, "lac": 10**5, "lakh": 10**5, "lakhs": 10**5, "लाख": 10**5,
+         "cr": 10**7, "crore": 10**7, "crores": 10**7, "करोड़": 10**7, "b": 10**9, "billion": 10**9}
+NUMBER = re.compile(r"^(\d{1,3}(?:,\d{2,3})+|\d+)(?:\.(\d+))?\s*([^\d\s.,]*)$")
+
+
+def parse_count(text):
+    """A count as Instagram shows it -> (int, shown). "12,400" -> (12400, None);
+    "12.4K" -> (12400, "12.4K"); "1.2 लाख" -> (120000, "1.2 लाख"). `shown` keeps the
+    rounded label so nobody mistakes 12400 for an exact count. Anything else is refused,
+    never reduced to its digits ("12.4K" used to become 124)."""
+    s = str(text).strip()
+    m = NUMBER.match(s)
+    if not m:
+        raise Refused(f"{s!r} is not a number. Write it as the post shows it (12,400 or 12.4K)")
+    whole, frac, unit = m.group(1).replace(",", ""), m.group(2), m.group(3).lower()
+    if unit and unit not in SCALE:
+        raise Refused(f"{s!r}: unknown unit {m.group(3)!r} (use K, M, lakh or crore)")
+    if not unit:
+        if frac:
+            raise Refused(f"{s!r} has a decimal but no unit: is it 12.4K?")
+        return int(whole), None
+    from decimal import Decimal
+    return int(Decimal(whole + "." + (frac or "0")) * SCALE[unit]), s
+
+
 class Store:
     def __init__(self, root):
         self.root = root
@@ -184,9 +231,10 @@ def clean_account(fields, source="manual", status="active", on=None):
         raise Refused(f"{a['handle']}: status must be one of {sorted(ACCOUNT_STATUS)}")
     a["added"] = a["added"] or today(on)
     if a["baseline_views"]:
-        digits = re.sub(r"[^\d]", "", a["baseline_views"])
-        if not digits:
-            raise Refused(f"{a['handle']}: baseline_views must be a number")
+        try:
+            digits = str(parse_count(a["baseline_views"])[0])
+        except Refused as e:
+            raise Refused(f"{a['handle']}: baseline_views: {e}")
         if a["baseline_basis"] not in BASES:
             raise Refused(f"{a['handle']}: baseline_views needs baseline_basis observed or estimate. "
                           "A number nobody can trace is not kept.")
@@ -236,12 +284,14 @@ def due_accounts(accounts, days, on=None):
 # posts
 # ---------------------------------------------------------------------------
 POST_TEXT = ["topic", "category", "hook", "on_screen", "structure", "visual_style", "why_it_works",
-             "adaptation", "notes", "language"]
+             "adaptation", "notes", "language", "caption"]
+POST_NUMBERS = {"slides": int, "duration_s": float}     # slide count for carousels, length for reels
 
 
 def clean_post(raw, on=None):
     p = {k: (v.strip() if isinstance(v, str) else v) for k, v in raw.items()}
-    out = {"handle": norm_handle(p.get("handle") or p.get("account")), "url": p.get("url") or p.get("post_url") or ""}
+    out = {"handle": norm_handle(p.get("handle") or p.get("account")),
+           "url": canonical_url(p.get("url") or p.get("post_url") or "")}
     fmt = (p.get("format") or "").lower()
     if fmt not in FORMATS:
         raise Refused(f"format must be one of {sorted(FORMATS)}, not {fmt!r}")
@@ -253,6 +303,23 @@ def clean_post(raw, on=None):
         raise Refused("a post needs at least a hook or a topic")
     if out.get("hook") and not out.get("language"):
         out["language"] = lang_of(out["hook"])
+    posted = str(p.get("posted_on") or p.get("posted") or "").strip()
+    if posted:
+        try:
+            dt.date.fromisoformat(posted)
+        except ValueError:
+            raise Refused(f"posted_on must be a date like 2026-11-10, not {posted!r}")
+        out["posted_on"] = posted
+    for k, kind in POST_NUMBERS.items():
+        v = str(p.get(k) if p.get(k) is not None else "").strip()
+        if v:
+            try:
+                n = kind(v.rstrip("s"))
+            except ValueError:
+                raise Refused(f"{k} must be a number, not {v!r}")
+            if n <= 0:
+                raise Refused(f"{k} must be above 0, not {v!r}")
+            out[k] = int(n) if kind is int or n == int(n) else n
     q = p.get("audience_questions") or []
     out["audience_questions"] = [x.strip() for x in (q.split("|") if isinstance(q, str) else q) if x.strip()]
     adapt = str(p.get("adaptable") or "").lower()
@@ -267,14 +334,17 @@ def clean_post(raw, on=None):
         basis = given.get(m, {}).get("basis") if isinstance(given.get(m), dict) else p.get(m + "_basis")
         if val in (None, ""):
             continue
-        digits = re.sub(r"[^\d]", "", str(val))
-        if not digits:
-            raise Refused(f"{m} is not a number: {val!r}")
+        try:
+            number, shown = parse_count(val)
+        except Refused as e:
+            raise Refused(f"{m}: {e}")
         basis = (basis or "").lower()
         if basis not in BASES:
             raise Refused(f"{m}={val} has no basis. Say {m}_basis observed (read off the post) or estimate. "
                           "A number nobody saw is not stored.")
-        metrics[m] = {"value": int(digits), "basis": basis}
+        metrics[m] = {"value": number, "basis": basis}
+        if shown:
+            metrics[m]["shown"] = shown
     out["metrics"] = metrics
     out["observed_on"] = p.get("observed_on") or today(on)
     out["captured_by"] = p.get("captured_by") or "manual"
@@ -284,18 +354,19 @@ def clean_post(raw, on=None):
 
 def add_posts(store, raws, on=None):
     posts = store.posts()
-    seen = {p["url"] for p in posts if p.get("url")}
+    seen = {post_key(p["url"]) for p in posts if p.get("url")}
     accounts = {a["handle"] for a in store.accounts()}
     cleaned, skipped, unknown = [], [], set()
     for r in raws:
         p = clean_post(r, on)
-        if p["url"] and p["url"] in seen:
+        if p["url"] and post_key(p["url"]) in seen:
             skipped.append(p["url"])
             continue
         if p["handle"] not in accounts:
             unknown.add(p["handle"])
         p["id"] = next_id(posts + cleaned, "p")
-        seen.add(p["url"])
+        if p["url"]:
+            seen.add(post_key(p["url"]))
         cleaned.append(p)
     store.save_posts(posts + cleaned)
     return cleaned, skipped, sorted(unknown)
@@ -334,7 +405,7 @@ def outliers(accounts, posts, minimum=1.0):
 def post_text(p):
     return " ".join(str(p.get(k, "")) for k in ("handle", "topic", "category", "hook", "on_screen",
                                                   "structure", "visual_style", "why_it_works", "adaptation",
-                                                  "notes")) + " " + " ".join(p.get("audience_questions", []))
+                                                  "notes", "caption")) + " " + " ".join(p.get("audience_questions", []))
 
 
 def search(posts, query, fmt=None, handle=None, since=None):
@@ -513,6 +584,20 @@ def fmt_metric(p, m):
     return f"{v['value']:,}" + ("" if v["basis"] == "observed" else " (est.)")
 
 
+def audience_questions(posts):
+    """Questions from comments, merged when they differ only in case, spacing or end
+    punctuation; most-asked first, then in capture order."""
+    groups = {}
+    for p in posts:
+        for q in p.get("audience_questions", []):
+            key = re.sub(r"[\s?!.।]+", " ", q.casefold()).strip()
+            if key:
+                g = groups.setdefault(key, [q.strip(), []])
+                if p["id"] not in g[1]:
+                    g[1].append(p["id"])
+    return sorted(groups.values(), key=lambda g: -len(g[1]))
+
+
 def digest(store, days=7, on=None, n=5, due_days=14):
     accounts, posts, ideas = store.accounts(), store.posts(), store.ideas()
     formulas = load_formulas(HOOKS) if load_formulas else None
@@ -552,6 +637,11 @@ def digest(store, days=7, on=None, n=5, due_days=14):
             L.append(f"- emerging {dim}: " + ", ".join(f"{r['value']} ({r['prior']} -> {r['recent']})" for r in em[:4]))
     if not any_trend:
         L.append("- nothing emerging: too few posts in the window to call a trend")
+    asked = audience_questions(new)
+    L += ["", f"## Audience questions (from comments on posts captured in the last {days} days)", ""]
+    L += [f"- \"{q}\"" + (f" (asked on {len(ids)} posts)" if len(ids) > 1 else "") + f": {', '.join(ids[:5])}"
+          for q, ids in asked[:15]] or ["- none captured in this window. Copy questions from comments, word for "
+                                       "word, into audience_questions."]
     unused = [p for p in posts if not p["used_in"] and p.get("adaptable") in ("yes", "maybe")]
     L += ["", f"## Adaptable insights not yet used ({len(unused)})", ""]
     L += [f"- {p['id']} {p['handle']}: {p.get('adaptation') or p.get('hook') or p.get('topic')}"
