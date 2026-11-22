@@ -44,6 +44,21 @@ def clamp(n):
     return max(0.0, min(100.0, n))
 
 
+def _codepoint(spec):
+    """'U+2003' -> 0x2003. Only the single-character specs are needed here."""
+    return int(spec[2:], 16)
+
+
+def space_classes(lex):
+    """The space-class characters slop.json names.
+
+    Read from the lexicon rather than listed here: this list was copied by
+    hand once and drifted, so three of the six classes were cleaned by
+    humanize.py and never counted by this check on the same file.
+    """
+    return [chr(_codepoint(e["cp"])) for e in lex["invisible"] if e["action"] == "space"]
+
+
 def scale(value, human, machine):
     """Map value onto 0-100 where `human` -> 100 and `machine` -> 0."""
     if human == machine:
@@ -103,18 +118,18 @@ def check_slop(text, lex):
     return score, detail
 
 
-def check_fingerprint(text):
+def check_fingerprint(text, lex):
     """Characters a phone keyboard does not produce."""
     invisible = sum(1 for c in text if unicodedata.category(c) == "Cf")
     em = text.count("—")
     curly = sum(text.count(c) for c in "‘’“”")
     ellip = text.count("…")
-    nbsp = sum(text.count(c) for c in "   ")
-    total = invisible * 4 + em * 2 + curly + ellip + nbsp
+    hard = sum(text.count(c) for c in space_classes(lex))
+    total = invisible * 4 + em * 2 + curly + ellip + hard
     per1k = total * 1000 / max(len(text), 1)
     score = scale(per1k, human=0.0, machine=12.0)
     detail = (f"{invisible} invisible, {em} em dash, {curly} curly quote, "
-              f"{ellip} ellipsis, {nbsp} hard space")
+              f"{ellip} ellipsis, {hard} hard space")
     return score, detail
 
 
@@ -159,7 +174,7 @@ def run(text, lex):
     results["BURSTINESS"] = check_burstiness(text)
     results["SPECIFICITY"] = check_specificity(text)
     results["SLOP DENSITY"] = check_slop(text, lex)
-    results["FINGERPRINT"] = check_fingerprint(text)
+    results["FINGERPRINT"] = check_fingerprint(text, lex)
     results["VOICE"] = check_voice(text, lex)
     scores = [results[c][0] for c in CHECKS]
     # The weakest check drags the verdict: a detector only needs one signal.
